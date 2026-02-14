@@ -19,6 +19,21 @@ mvn clean javafx:run
 mvn clean package
 ```
 
+## Backend logic and DB operations
+
+Add backend or data access code under `src/main/java`, for example:
+
+- `com.splitms.db` for database access
+- `com.splitms.service` for business logic
+
+This repo includes a simple PostgreSQL helper in `com.splitms.db.Database` that reads these env vars:
+
+- `DB_HOST`
+- `DB_PORT` (defaults to 5432 if not set)
+- `DB_NAME`
+- `DB_USER`
+- `DB_PASSWORD`
+
 ## Project initialization
 
 ```bash

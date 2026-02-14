@@ -1,4 +1,4 @@
-package com.splitms;
+package com.splitms.utils;
 
 public class SystemInfo {
 

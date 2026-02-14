@@ -1,0 +1,18 @@
+version: "3.9"
+
+services:
+  db:
+    image: postgres:16
+    container_name: splitms-postgres
+    restart: unless-stopped
+    environment:
+      POSTGRES_DB: splitms
+      POSTGRES_USER: splitms
+      POSTGRES_PASSWORD: splitms
+    ports:
+      - "5432:5432"
+    volumes:
+      - splitms_pg_data:/var/lib/postgresql/data
+
+volumes:
+  splitms_pg_data:
