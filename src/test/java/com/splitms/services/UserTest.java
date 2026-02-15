@@ -1,82 +1,73 @@
 package com.splitms.services;
 
+import org.junit.Before;
+import org.junit.Test;
+import static org.junit.Assert.*;
+
 public class UserTest {
 
-    public static void main(String[] args) {
-        UserTest test = new UserTest();
-        test.testDefaultConstructor();
-        test.testParameterizedConstructor();
-        test.testLoginWithValidCredentials();
-        test.testLoginWithInvalidEmail();
-        test.testLoginWithInvalidPassword();
-        test.testRegister();
-        test.testHashPassword();
-        test.testGetUserName();
-        test.testGetUserEmail();
-        System.out.println("All tests passed!");
+    private User user;
+
+    @Before
+    public void setUp() {
+        user = new User("John Doe", "john@example.com", "password123");
     }
 
+    @Test
     public void testDefaultConstructor() {
         User defaultUser = new User();
-        assert defaultUser != null : "User should not be null";
-        assert defaultUser.getUserName().equals("") : "Default name should be empty";
-        assert defaultUser.getUserEmail().equals("") : "Default email should be empty";
-        System.out.println("✓ testDefaultConstructor passed");
+        assertNotNull("User should not be null", defaultUser);
+        assertEquals("Default name should be empty", "", defaultUser.getUserName());
+        assertEquals("Default email should be empty", "", defaultUser.getUserEmail());
     }
 
+    @Test
     public void testParameterizedConstructor() {
-        User user = new User("John Doe", "john@example.com", "password123");
-        assert user.getUserName().equals("John Doe") : "Name should match";
-        assert user.getUserEmail().equals("john@example.com") : "Email should match";
-        System.out.println("✓ testParameterizedConstructor passed");
+        assertEquals("Name should match", "John Doe", user.getUserName());
+        assertEquals("Email should match", "john@example.com", user.getUserEmail());
     }
 
+    @Test
     public void testLoginWithValidCredentials() {
-        User user = new User("John Doe", "john@example.com", "password123");
-        boolean result = user.login("john@example.com", "password123");
-        assert result : "Login should succeed with valid credentials";
-        System.out.println("✓ testLoginWithValidCredentials passed");
+        int result = user.login("john@example.com", "password123");
+        assertTrue("Login should return userId >= 0", result >= 0);
     }
 
+    @Test
     public void testLoginWithInvalidEmail() {
-        User user = new User("John Doe", "john@example.com", "password123");
-        boolean result = user.login("wrong@example.com", "password123");
-        assert !result : "Login should fail with invalid email";
-        System.out.println("✓ testLoginWithInvalidEmail passed");
+        int result = user.login("wrong@example.com", "password123");
+        assertEquals("Login should return -1 on invalid email", -1, result);
     }
 
+    @Test
     public void testLoginWithInvalidPassword() {
-        User user = new User("John Doe", "john@example.com", "password123");
-        boolean result = user.login("john@example.com", "wrongpassword");
-        assert !result : "Login should fail with invalid password";
-        System.out.println("✓ testLoginWithInvalidPassword passed");
+        int result = user.login("john@example.com", "wrongpassword");
+        assertEquals("Login should return -1 on invalid password", -1, result);
     }
 
+    @Test
     public void testRegister() {
         User newUser = new User();
         boolean result = newUser.register("Jane Doe", "jane@example.com", "pass456");
-        assert result : "Registration should succeed";
-        assert newUser.getUserName().equals("Jane Doe") : "Name should match after registration";
-        assert newUser.getUserEmail().equals("jane@example.com") : "Email should match after registration";
-        System.out.println("✓ testRegister passed");
+        assertTrue("Registration should succeed", result);
+        assertEquals("Name should match after registration", "Jane Doe", newUser.getUserName());
+        assertEquals("Email should match after registration", "jane@example.com", newUser.getUserEmail());
     }
 
+    @Test
     public void testHashPassword() {
         String hashed = User.hashPassword("password123");
-        assert hashed != null : "Hashed password should not be null";
-        assert !hashed.isEmpty() : "Hashed password should not be empty";
-        System.out.println("✓ testHashPassword passed");
+        assertNotNull("Hashed password should not be null", hashed);
+        assertFalse("Hashed password should not be empty", hashed.isEmpty());
     }
 
+    @Test
     public void testGetUserName() {
-        User user = new User("John Doe", "john@example.com", "password123");
-        assert user.getUserName().equals("John Doe") : "getUserName should return correct name";
-        System.out.println("✓ testGetUserName passed");
+        assertEquals("getUserName should return correct name", "John Doe", user.getUserName());
     }
 
+    @Test
     public void testGetUserEmail() {
-        User user = new User("John Doe", "john@example.com", "password123");
-        assert user.getUserEmail().equals("john@example.com") : "getUserEmail should return correct email";
-        System.out.println("✓ testGetUserEmail passed");
+        assertEquals("getUserEmail should return correct email", "john@example.com", user.getUserEmail());
     }
 }

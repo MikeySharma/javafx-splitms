@@ -12,7 +12,7 @@ public class User {
 
     // default constructor
     public User() {
-        this.userId = UUID.randomUUID().hashCode();
+        this.userId = Math.abs(UUID.randomUUID().hashCode());
         this.name = "";
         this.email = "";
         this.passwordHash = "";
@@ -20,17 +20,21 @@ public class User {
 
     // parameterized constructor
     public User(String name, String email, String passwordHash) {
-        this.userId = UUID.randomUUID().hashCode();
+        this.userId = Math.abs(UUID.randomUUID().hashCode());
         this.name = name;
         this.email = email;
         this.passwordHash = passwordHash;
     }
 
     // login method
-    public boolean login(String email, String passwordHash) {
+    public int login(String email, String passwordHash) {
         // In a real application, you would check the email and passwordHash against a
         // database
-        return this.email.equals(email) && this.passwordHash.equals(passwordHash);
+        if (this.email.equals(email) && this.passwordHash.equals(passwordHash)) {
+            return this.userId; // Return user ID on successful login
+        } else {
+            return -1; // Return -1 on failed login
+        }
     }
 
     // register method
