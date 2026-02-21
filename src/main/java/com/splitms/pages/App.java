@@ -27,14 +27,14 @@ public class App extends Application {
         System.out.println("Java version: " + SystemInfo.javaVersion());
         System.out.println("JavaFX version: " + SystemInfo.javafxVersion());
 
-        // Test database connection
+        // Test database connection - throw error if it fails
         try {
             Map<String, String> dbInfo = Database.fetchDatabaseInfo();
             System.out.println("Connected to database: " + dbInfo.get("database"));
             System.out.println("Database user: " + dbInfo.get("user"));
             System.out.println("Database version: " + dbInfo.get("version"));
         } catch (Exception e) {
-            System.err.println("Failed to connect to database: " + e.getMessage());
+            throw new RuntimeException("Failed to connect to database. Please ensure PostgreSQL is running and database credentials are correct.", e);
         }
 
         // Launch JavaFX application
