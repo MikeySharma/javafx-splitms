@@ -1,4 +1,85 @@
 .root {
-    background-color: #fcfcf8;
-    -fx-background-color: #fcfcf8;
+    -fx-background-color: #eef5ff;
+}
+
+.index-root {
+    -fx-background-color: linear-gradient(to bottom, #eef5ff, #e7f0ff);
+}
+
+.app-header {
+    -fx-padding: 14 24 14 24;
+    -fx-border-color: #c8daf7;
+    -fx-border-width: 0 0 1 0;
+    -fx-background-color: #f7fbff;
+}
+
+.header-logo {
+    -fx-font-size: 18px;
+}
+
+.header-title {
+    -fx-font-size: 20px;
+    -fx-font-weight: 700;
+    -fx-text-fill: #153b70;
+}
+
+.index-content {
+    -fx-padding: 8 0 0 0;
+}
+
+.hero-title {
+    -fx-font-size: 40px;
+    -fx-font-weight: 700;
+    -fx-text-fill: #103467;
+}
+
+.hero-subtitle {
+    -fx-font-size: 16px;
+    -fx-text-fill: #315785;
+}
+
+.primary-button {
+    -fx-background-color: #2f6fd6;
+    -fx-text-fill: white;
+    -fx-font-weight: 600;
+    -fx-background-radius: 8;
+    -fx-padding: 8 16 8 16;
+}
+
+.outline-button {
+    -fx-background-color: transparent;
+    -fx-border-color: #2f6fd6;
+    -fx-border-radius: 8;
+    -fx-background-radius: 8;
+    -fx-text-fill: #2f6fd6;
+    -fx-font-weight: 600;
+    -fx-cursor: hand;
+    -fx-padding: 8 16 8 16;
+}
+
+.feature-card {
+    -fx-background-color: #ffffff;
+    -fx-background-radius: 12;
+    -fx-border-color: #d2e2fa;
+    -fx-border-radius: 12;
+    -fx-padding: 16;
+}
+
+.feature-icon {
+    -fx-font-size: 22px;
+}
+
+.feature-icon-image {
+    -fx-opacity: 0.95;
+}
+
+.feature-title {
+    -fx-font-size: 18px;
+    -fx-font-weight: 700;
+    -fx-text-fill: #1c467f;
+}
+
+.feature-description {
+    -fx-font-size: 14px;
+    -fx-text-fill: #496d99;
 }

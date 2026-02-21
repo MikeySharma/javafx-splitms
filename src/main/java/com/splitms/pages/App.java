@@ -14,10 +14,10 @@ public class App extends Application {
     @Override
     public void start(Stage stage) {
         PageManager manager = new PageManager(stage, 1080, 780);
-        manager.register(PageId.HELLO, new HelloPage());
-        manager.register(PageId.HELLO_TWO, new HelloTwoPage());
+        manager.register(PageId.INDEX, new IndexPage());
+        manager.register(PageId.LoGIN, new LoginPage());
 
-        manager.show(PageId.HELLO);
+        manager.show(PageId.INDEX);
         stage.show();
     }
 
@@ -34,7 +34,8 @@ public class App extends Application {
             System.out.println("Database user: " + dbInfo.get("user"));
             System.out.println("Database version: " + dbInfo.get("version"));
         } catch (Exception e) {
-            throw new RuntimeException("Failed to connect to database. Please ensure PostgreSQL is running and database credentials are correct.", e);
+            System.err.println("Warning: Database unavailable. Launching UI without DB connection.");
+            System.err.println("Reason: " + e.getMessage());
         }
 
         // Launch JavaFX application

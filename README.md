@@ -51,3 +51,7 @@ mvn archetype:generate \
 
 - `src/main/java` - Java sources
 - `pom.xml` - Maven build and JavaFX plugin config
+
+## Additional docs
+
+- `UI_DESIGN_AND_PAGINATION.md` - explains current UI design and page navigation flow
