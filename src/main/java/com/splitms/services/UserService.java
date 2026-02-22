@@ -1,11 +1,8 @@
 package com.splitms.services;
 
-import com.splitms.entities.UserEntity;
-import com.splitms.lib.Jpa;
-import jakarta.persistence.EntityManager;
-import jakarta.persistence.EntityTransaction;
-import jakarta.persistence.NoResultException;
-import jakarta.persistence.PersistenceException;
+import com.splitms.lib.Database;
+import java.sql.ResultSet;
+import java.sql.SQLException;
 
 public class UserService {
 
@@ -33,25 +30,28 @@ public class UserService {
         return Integer.toString(password.hashCode());
     }
 
+    private static String escapeSql(String value) {
+        return value == null ? "" : value.replace("'", "''");
+    }
+
     // login method
     public long login(String email, String password) {
         String hashed = hashPassword(password);
+        String safeEmail = escapeSql(email);
+        String sql = "select id, name, email, password_hash from users where email = '" + safeEmail + "' limit 1";
 
-        try (EntityManager entityManager = Jpa.openEntityManager()) {
-            UserEntity found = entityManager
-                    .createQuery("select u from UserEntity u where u.email = :email", UserEntity.class)
-                    .setParameter("email", email)
-                    .getSingleResult();
-
-            if (hashed.equals(found.getPasswordHash())) {
-                this.userId = found.getId();
-                this.name = found.getName();
-                this.email = found.getEmail();
-                return this.userId;
+        try (ResultSet rs = Database.executeQuery(sql)) {
+            if (!rs.next()) {
+                return -1;
             }
-        } catch (NoResultException ignored) {
-            return -1;
-        } catch (RuntimeException e) {
+
+            if (hashed.equals(rs.getString("password_hash"))) {
+                this.userId = rs.getLong("id");
+                this.name = rs.getString("name");
+                this.email = rs.getString("email");
+                return userId;
+            }
+        } catch (SQLException e) {
             throw new RuntimeException("Database operation failed: " + e.getMessage(), e);
         }
 
@@ -61,19 +61,29 @@ public class UserService {
     // register method
     public boolean register(String name, String email, String password) {
         String hashed = hashPassword(password);
+        String safeName = escapeSql(name);
+        String safeEmail = escapeSql(email);
+        String safeHash = escapeSql(hashed);
 
-        try (EntityManager entityManager = Jpa.openEntityManager()) {
-            EntityTransaction transaction = entityManager.getTransaction();
-            transaction.begin();
-            UserEntity entity = new UserEntity(name, email, hashed);
-            entityManager.persist(entity);
-            transaction.commit();
+        String insertSql = "insert into users(name, email, password_hash) values ('"
+                + safeName + "', '" + safeEmail + "', '" + safeHash + "')";
 
-            this.userId = entity.getId();
+        try {
+            int rows = Database.executeUpdate(insertSql);
+            if (rows <= 0) {
+                return false;
+            }
+
+            try (ResultSet idResult = Database.executeQuery("select last_insert_id()")) {
+                if (idResult.next()) {
+                    this.userId = idResult.getLong(1);
+                }
+            }
+
             this.name = name;
             this.email = email;
             return true;
-        } catch (PersistenceException e) {
+        } catch (SQLException e) {
             this.userId = null;
             this.name = "";
             this.email = "";
@@ -85,13 +95,13 @@ public class UserService {
      * Delete a user by email (for testing purposes)
      */
     public static void deleteByEmail(String email) {
-        try (EntityManager entityManager = Jpa.openEntityManager()) {
-            EntityTransaction transaction = entityManager.getTransaction();
-            transaction.begin();
-            entityManager.createQuery("delete from UserEntity u where u.email = :email")
-                    .setParameter("email", email)
-                    .executeUpdate();
-            transaction.commit();
+        String safeEmail = escapeSql(email);
+        String sql = "delete from users where email = '" + safeEmail + "'";
+
+        try {
+            Database.executeUpdate(sql);
+        } catch (SQLException e) {
+            throw new RuntimeException("Database operation failed: " + e.getMessage(), e);
         }
     }
 

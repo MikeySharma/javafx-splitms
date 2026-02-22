@@ -1,7 +1,7 @@
 package com.splitms.pages;
 
 import com.splitms.utils.SystemInfo;
-import com.splitms.lib.Jpa;
+import com.splitms.lib.Database;
 import java.util.Map;
 import javafx.application.Application;
 import javafx.stage.Stage;
@@ -18,25 +18,9 @@ public class SplitmsApplication extends Application {
 
     @Override
     public void start(Stage stage) {
-        navigator = new ViewNavigator(stage, APP_WIDTH, APP_HEIGHT);
-        navigator.showIndex();
-        stage.show();
-    }
-
-    @Override
-    public void stop() {
-        Jpa.shutdown();
-    }
-
-    public static void main(String[] args) {
-
-        // Print system info
-        System.out.println("Java version: " + SystemInfo.javaVersion());
-        System.out.println("JavaFX version: " + SystemInfo.javafxVersion());
-
-        // Test database connection - throw error if it fails
         try {
-            Map<String, String> dbInfo = Jpa.fetchDatabaseInfo();
+            Database.initialize();
+            Map<String, String> dbInfo = Database.fetchDatabaseInfo();
             System.out.println("Connected to database: " + dbInfo.get("database"));
             System.out.println("Database user: " + dbInfo.get("user"));
             System.out.println("Database version: " + dbInfo.get("version"));
@@ -44,6 +28,22 @@ public class SplitmsApplication extends Application {
             System.err.println("Warning: Database unavailable. Launching UI without DB connection.");
             System.err.println("Reason: " + e.getMessage());
         }
+
+        navigator = new ViewNavigator(stage, APP_WIDTH, APP_HEIGHT);
+        navigator.showIndex();
+        stage.show();
+    }
+
+    @Override
+    public void stop() {
+        Database.shutdown();
+    }
+
+    public static void main(String[] args) {
+
+        // Print system info
+        System.out.println("Java version: " + SystemInfo.javaVersion());
+        System.out.println("JavaFX version: " + SystemInfo.javafxVersion());
 
         // Launch JavaFX application
         launch();
