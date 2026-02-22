@@ -16,17 +16,18 @@ public final class Database {
 
     public static Connection open() throws SQLException {
         String host = EnvConfig.getRequiredEnv("DB_HOST");
-        String port = EnvConfig.getEnvOrDefault("DB_PORT", "5432");
+        String port = EnvConfig.getEnvOrDefault("DB_PORT", "3306");
         String name = EnvConfig.getRequiredEnv("DB_NAME");
         String user = EnvConfig.getRequiredEnv("DB_USER");
         String password = EnvConfig.getRequiredEnv("DB_PASSWORD");
 
-        String url = "jdbc:postgresql://" + host + ":" + port + "/" + name;
+        String url = "jdbc:mysql://" + host + ":" + port + "/" + name
+            + "?useSSL=false&allowPublicKeyRetrieval=true&serverTimezone=UTC";
         return DriverManager.getConnection(url, user, password);
     }
 
     public static Map<String, String> fetchDatabaseInfo() throws SQLException {
-        String sql = "select current_database(), current_user, version()";
+        String sql = "select database(), current_user(), version()";
         Map<String, String> info = new HashMap<>();
 
         try (Connection connection = open();

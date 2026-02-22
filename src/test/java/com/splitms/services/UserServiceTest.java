@@ -4,22 +4,24 @@ import org.junit.Before;
 import org.junit.Test;
 import static org.junit.Assert.*;
 
-public class UserTest {
+public class UserServiceTest {
 
     private static final String DEFAULT_NAME = "John Doe";
     private static final String DEFAULT_EMAIL = "john@example.com";
     private static final String DEFAULT_PASSWORD = "password123";
     private static final String INVALID_EMAIL = "wrong@example.com";
     private static final String INVALID_PASSWORD = "wrongpassword";
+    private static final String SECONDARY_EMAIL = "jane@example.com";
 
-    private User user;
+    private UserService user;
 
     @Before
     public void setUp() {
-        user = new User();
+        user = new UserService();
         // Delete test user if they exist from previous test runs
         try {
-            User.deleteByEmail(DEFAULT_EMAIL);
+            UserService.deleteByEmail(DEFAULT_EMAIL);
+            UserService.deleteByEmail(SECONDARY_EMAIL);
         } catch (Exception e) {
             // User doesn't exist yet, that's fine
         }
@@ -28,14 +30,14 @@ public class UserTest {
 
     @Test
     public void testDefaultConstructor() {
-        User defaultUser = new User();
+        UserService defaultUser = new UserService();
         assertNotNull("User should not be null", defaultUser);
         assertUserFields(defaultUser, "", "");
     }
 
     @Test
     public void testParameterizedConstructor() {
-        User created = createUser(DEFAULT_NAME, DEFAULT_EMAIL, DEFAULT_PASSWORD);
+        UserService created = createUser(DEFAULT_NAME, DEFAULT_EMAIL, DEFAULT_PASSWORD);
         assertUserFields(created, DEFAULT_NAME, DEFAULT_EMAIL);
     }
 
@@ -59,10 +61,10 @@ public class UserTest {
 
     @Test
     public void testRegister() {
-        User newUser = new User();
-        boolean result = newUser.register("Jane Doe", "jane@example.com", "pass456");
+        UserService newUser = new UserService();
+        boolean result = newUser.register("Jane Doe", SECONDARY_EMAIL, "pass456");
         assertTrue("Registration should succeed", result);
-        assertUserFields(newUser, "Jane Doe", "jane@example.com");
+        assertUserFields(newUser, "Jane Doe", SECONDARY_EMAIL);
     }
     
     @Test
@@ -75,11 +77,11 @@ public class UserTest {
         assertEquals("getUserEmail should return correct email", DEFAULT_EMAIL, user.getUserEmail());
     }
 
-    private static User createUser(String name, String email, String password) {
-        return new User(name, email, password);
+    private static UserService createUser(String name, String email, String password) {
+        return new UserService(name, email, password);
     }
 
-    private static void assertUserFields(User user, String expectedName, String expectedEmail) {
+    private static void assertUserFields(UserService user, String expectedName, String expectedEmail) {
         assertEquals("Name should match", expectedName, user.getUserName());
         assertEquals("Email should match", expectedEmail, user.getUserEmail());
     }

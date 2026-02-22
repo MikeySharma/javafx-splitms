@@ -1,0 +1,17 @@
+services:
+  db:
+    image: mysql:9.6
+    container_name: splitms-mysql
+    restart: unless-stopped
+    environment:
+      MYSQL_DATABASE: splitms
+      MYSQL_USER: splitms
+      MYSQL_PASSWORD: splitms
+      MYSQL_ROOT_PASSWORD: root
+    ports:
+      - "3306:3306"
+    volumes:
+      - splitms_mysql_data:/var/lib/mysql
+
+volumes:
+  splitms_mysql_data:

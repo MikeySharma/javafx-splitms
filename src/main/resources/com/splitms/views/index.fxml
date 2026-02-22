@@ -1,0 +1,88 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.geometry.Insets?>
+<?import javafx.geometry.Pos?>
+<?import javafx.scene.control.Button?>
+<?import javafx.scene.control.Label?>
+<?import javafx.scene.image.Image?>
+<?import javafx.scene.image.ImageView?>
+<?import javafx.scene.layout.BorderPane?>
+<?import javafx.scene.layout.HBox?>
+<?import javafx.scene.layout.Priority?>
+<?import javafx.scene.layout.Region?>
+<?import javafx.scene.layout.VBox?>
+
+<BorderPane xmlns="http://javafx.com/javafx/25"
+            xmlns:fx="http://javafx.com/fxml/1"
+            fx:controller="com.splitms.controllers.IndexController"
+            styleClass="index-root">
+
+    <top>
+        <HBox alignment="CENTER_LEFT" prefHeight="60.0" styleClass="app-header">
+            <Label styleClass="header-title" text="SplitMS" />
+            <Region HBox.hgrow="ALWAYS" />
+            <HBox alignment="CENTER_RIGHT" spacing="10.0">
+                <Button onAction="#onLogin" styleClass="outline-button" text="Login" />
+                <Button onAction="#onRegister" styleClass="primary-button" text="Register" />
+            </HBox>
+        </HBox>
+    </top>
+
+    <center>
+        <VBox alignment="CENTER" spacing="26.0" styleClass="index-content">
+            <padding>
+                <Insets top="24.0" right="24.0" bottom="24.0" left="24.0" />
+            </padding>
+
+            <VBox alignment="CENTER" spacing="10.0">
+                <Label styleClass="hero-title" text="Smart expense splitting for everyone" />
+                <Label maxWidth="620.0"
+                       styleClass="hero-subtitle"
+                       text="SplitMS helps flatmates, friends, and teams track expenses and settle up clearly."
+                       wrapText="true" />
+            </VBox>
+
+            <HBox alignment="CENTER" spacing="16.0">
+                <VBox alignment="TOP_LEFT" prefWidth="240.0" spacing="10.0" styleClass="feature-card">
+                    <ImageView fitHeight="28.0" fitWidth="28.0" preserveRatio="true" styleClass="feature-icon-image">
+                        <image>
+                            <Image url="@/com/splitms/assets/icons/track.png" />
+                        </image>
+                    </ImageView>
+                    <Label styleClass="feature-title" text="Track" />
+                    <Label maxWidth="210.0"
+                           styleClass="feature-description"
+                           text="Monitor your daily and group spending in one place."
+                           wrapText="true" />
+                </VBox>
+
+                <VBox alignment="TOP_LEFT" prefWidth="240.0" spacing="10.0" styleClass="feature-card">
+                    <ImageView fitHeight="28.0" fitWidth="28.0" preserveRatio="true" styleClass="feature-icon-image">
+                        <image>
+                            <Image url="@/com/splitms/assets/icons/split.png" />
+                        </image>
+                    </ImageView>
+                    <Label styleClass="feature-title" text="Split" />
+                    <Label maxWidth="210.0"
+                           styleClass="feature-description"
+                           text="Split bills equally, by percent, or fixed amount."
+                           wrapText="true" />
+                </VBox>
+
+                <VBox alignment="TOP_LEFT" prefWidth="240.0" spacing="10.0" styleClass="feature-card">
+                    <ImageView fitHeight="28.0" fitWidth="28.0" preserveRatio="true" styleClass="feature-icon-image">
+                        <image>
+                            <Image url="@/com/splitms/assets/icons/learn.png" />
+                        </image>
+                    </ImageView>
+                    <Label styleClass="feature-title" text="Learn" />
+                    <Label maxWidth="210.0"
+                           styleClass="feature-description"
+                           text="Explore finance topics through simple learning content."
+                           wrapText="true" />
+                </VBox>
+            </HBox>
+        </VBox>
+    </center>
+
+</BorderPane>

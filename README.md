@@ -1,6 +1,6 @@
 # splitms-java
 
-JavaFX app built with Maven.
+JavaFX app built with Maven, using FXML-based views and MySQL persistence.
 
 ## Prerequisites
 
@@ -19,6 +19,20 @@ mvn clean javafx:run
 mvn clean package
 ```
 
+## Database (MySQL)
+
+Start local MySQL:
+
+```bash
+docker compose -f docker/mysql-splitms/docker-compose.yml up -d
+```
+
+Run migrations:
+
+```bash
+mvn flyway:migrate
+```
+
 ## Backend logic and DB operations
 
 Add backend or data access code under `src/main/java`, for example:
@@ -26,10 +40,10 @@ Add backend or data access code under `src/main/java`, for example:
 - `com.splitms.db` for database access
 - `com.splitms.service` for business logic
 
-This repo includes a simple PostgreSQL helper in `com.splitms.db.Database` that reads these env vars:
+This repo reads these env vars:
 
 - `DB_HOST`
-- `DB_PORT` (defaults to 5432 if not set)
+- `DB_PORT` (defaults to 3306 for local Docker)
 - `DB_NAME`
 - `DB_USER`
 - `DB_PASSWORD`
@@ -50,6 +64,7 @@ mvn archetype:generate \
 ## Project layout
 
 - `src/main/java` - Java sources
+- `src/main/resources/com/splitms/views` - FXML view files
 - `pom.xml` - Maven build and JavaFX plugin config
 
 ## Additional docs

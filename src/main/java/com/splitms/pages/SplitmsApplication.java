@@ -1,7 +1,7 @@
 package com.splitms.pages;
 
 import com.splitms.utils.SystemInfo;
-import com.splitms.lib.Database;
+import com.splitms.lib.Jpa;
 import java.util.Map;
 import javafx.application.Application;
 import javafx.stage.Stage;
@@ -9,16 +9,23 @@ import javafx.stage.Stage;
 /**
  * JavaFX App
  */
-public class App extends Application {
+public class SplitmsApplication extends Application {
+
+    private static final double APP_WIDTH = 1080;
+    private static final double APP_HEIGHT = 780;
+
+    private ViewNavigator navigator;
 
     @Override
     public void start(Stage stage) {
-        PageManager manager = new PageManager(stage, 1080, 780);
-        manager.register(PageId.INDEX, new IndexPage());
-        manager.register(PageId.LoGIN, new LoginPage());
-
-        manager.show(PageId.INDEX);
+        navigator = new ViewNavigator(stage, APP_WIDTH, APP_HEIGHT);
+        navigator.showIndex();
         stage.show();
+    }
+
+    @Override
+    public void stop() {
+        Jpa.shutdown();
     }
 
     public static void main(String[] args) {
@@ -29,7 +36,7 @@ public class App extends Application {
 
         // Test database connection - throw error if it fails
         try {
-            Map<String, String> dbInfo = Database.fetchDatabaseInfo();
+            Map<String, String> dbInfo = Jpa.fetchDatabaseInfo();
             System.out.println("Connected to database: " + dbInfo.get("database"));
             System.out.println("Database user: " + dbInfo.get("user"));
             System.out.println("Database version: " + dbInfo.get("version"));

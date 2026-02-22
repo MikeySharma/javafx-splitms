@@ -53,11 +53,15 @@ public final class EnvConfig {
     }
 
     public static String get(String name) {
-        return envVariables.get(name);
+        String value = envVariables.get(name);
+        if (value == null || value.isBlank()) {
+            return System.getenv(name);
+        }
+        return value;
     }
 
     public static String getRequiredEnv(String name) {
-        String value = envVariables.get(name);
+        String value = get(name);
         if (value == null || value.isBlank()) {
             throw new IllegalStateException("Missing required environment variable: " + name);
         }
@@ -65,7 +69,7 @@ public final class EnvConfig {
     }
 
     public static String getEnvOrDefault(String name, String fallback) {
-        String value = envVariables.get(name);
+        String value = get(name);
         if (value == null || value.isBlank()) {
             return fallback;
         }
