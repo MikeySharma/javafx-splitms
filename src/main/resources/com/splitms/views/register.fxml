@@ -18,7 +18,6 @@
     <top>
         <HBox alignment="CENTER_LEFT" prefHeight="60.0" styleClass="app-header">
             <Button onAction="#onBack" styleClass="outline-button" text="Back" />
-            <Label styleClass="header-title" text="Register" />
         </HBox>
     </top>
 

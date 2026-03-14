@@ -2,6 +2,9 @@ package com.splitms.controllers;
 
 import com.splitms.pages.ViewNavigator;
 import com.splitms.services.UserService;
+import com.splitms.utils.Normalize;
+import com.splitms.utils.Validation;
+
 import javafx.fxml.FXML;
 import javafx.scene.control.Label;
 import javafx.scene.control.PasswordField;
@@ -35,16 +38,16 @@ public class RegisterController implements NavigatorAware {
 
     @FXML
     private void onRegister() {
-        String name = normalize(nameField.getText());
-        String email = normalize(emailField.getText());
-        String password = passwordField.getText() == null ? "" : passwordField.getText().trim();
+        String name = Normalize.normalizeText(nameField.getText());
+        String email = Normalize.normalizeEmail(emailField.getText());
+        String password = Normalize.normalizeText(passwordField.getText());
 
         if (name.isEmpty() || email.isEmpty() || password.isEmpty()) {
             showError("Please fill in all fields.");
             return;
         }
 
-        if (!isValidEmail(email)) {
+        if (!Validation.isValidEmail(email)) {
             showError("Please enter a valid email address.");
             return;
         }
@@ -76,11 +79,4 @@ public class RegisterController implements NavigatorAware {
         messageLabel.setText(message);
     }
 
-    private static String normalize(String value) {
-        return value == null ? "" : value.trim();
-    }
-
-    private static boolean isValidEmail(String email) {
-        return email.contains("@") && email.contains(".") && email.indexOf('@') < email.lastIndexOf('.');
-    }
 }

@@ -44,6 +44,7 @@
     -fx-font-weight: 600;
     -fx-background-radius: 8;
     -fx-padding: 8 16 8 16;
+    -fx-cursor: hand;
 }
 
 .outline-button {
