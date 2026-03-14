@@ -1,5 +1,5 @@
 create table if not exists users (
-    id bigint primary key auto_increment,
+    id int primary key auto_increment,
     name varchar(200) not null,
     email varchar(320) not null unique,
     password_hash varchar(200) not null,

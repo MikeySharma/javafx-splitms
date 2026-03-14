@@ -7,7 +7,7 @@ import java.sql.SQLException;
 public class UserService {
 
     // variable declarations
-    private Long userId;
+    private Integer userId;
     private String name;
     private String email;
 
@@ -35,7 +35,7 @@ public class UserService {
     }
 
     // login method
-    public long login(String email, String password) {
+    public int login(String email, String password) {
         String hashed = hashPassword(password);
         String safeEmail = escapeSql(email);
         String sql = "select id, name, email, password_hash from users where email = '" + safeEmail + "' limit 1";
@@ -46,7 +46,7 @@ public class UserService {
             }
 
             if (hashed.equals(rs.getString("password_hash"))) {
-                this.userId = rs.getLong("id");
+                this.userId = rs.getInt("id");
                 this.name = rs.getString("name");
                 this.email = rs.getString("email");
                 return userId;
@@ -76,7 +76,7 @@ public class UserService {
 
             try (ResultSet idResult = Database.executeQuery("select last_insert_id()")) {
                 if (idResult.next()) {
-                    this.userId = idResult.getLong(1);
+                    this.userId = idResult.getInt(1);
                 }
             }
 

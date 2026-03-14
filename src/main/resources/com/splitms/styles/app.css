@@ -83,3 +83,36 @@
     -fx-font-size: 14px;
     -fx-text-fill: #496d99;
 }
+
+.form-card {
+    -fx-background-color: #ffffff;
+    -fx-background-radius: 12;
+    -fx-border-color: #d2e2fa;
+    -fx-border-radius: 12;
+}
+
+.form-label {
+    -fx-font-size: 13px;
+    -fx-font-weight: 600;
+    -fx-text-fill: #2d4d79;
+}
+
+.text-input {
+    -fx-background-color: #f8fbff;
+    -fx-border-color: #c9dcf8;
+    -fx-border-radius: 8;
+    -fx-background-radius: 8;
+    -fx-padding: 8 10 8 10;
+}
+
+.status-label {
+    -fx-font-size: 13px;
+}
+
+.status-error {
+    -fx-text-fill: #c0392b;
+}
+
+.status-success {
+    -fx-text-fill: #1c8f4a;
+}

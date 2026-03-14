@@ -28,7 +28,7 @@ docker compose -f docker/mysql-splitms/docker-compose.yml up -d
 ```
 
 Run migrations:
-
+Keep in mind first to export the ENV variables to run this.
 ```bash
 mvn flyway:migrate
 ```

@@ -1,6 +1,6 @@
 services:
   db:
-    image: mysql:9.6
+    image: mysql:9.4
     container_name: splitms-mysql
     restart: unless-stopped
     environment:

@@ -19,6 +19,6 @@ public class IndexController implements NavigatorAware {
 
     @FXML
     private void onRegister() {
-        navigator.showLogin();
+        navigator.showRegister();
     }
 }

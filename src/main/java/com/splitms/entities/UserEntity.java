@@ -15,7 +15,7 @@ public class UserEntity {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long id;
+    private int id;
 
     @Column(name = "name", nullable = false, length = 200)
     private String name;
@@ -45,7 +45,7 @@ public class UserEntity {
         }
     }
 
-    public Long getId() {
+    public int getId() {
         return id;
     }
 
