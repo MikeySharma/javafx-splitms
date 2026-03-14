@@ -1,6 +1,7 @@
 package com.splitms.services;
 
 import com.splitms.lib.Database;
+import com.splitms.utils.Validation;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 
@@ -30,14 +31,10 @@ public class UserService {
         return Integer.toString(password.hashCode());
     }
 
-    private static String escapeSql(String value) {
-        return value == null ? "" : value.replace("'", "''");
-    }
-
     // login method
     public int login(String email, String password) {
         String hashed = hashPassword(password);
-        String safeEmail = escapeSql(email);
+        String safeEmail = Validation.escapeSql(email);
         String sql = "select id, name, email, password_hash from users where email = '" + safeEmail + "' limit 1";
 
         try (ResultSet rs = Database.executeQuery(sql)) {
@@ -61,9 +58,9 @@ public class UserService {
     // register method
     public boolean register(String name, String email, String password) {
         String hashed = hashPassword(password);
-        String safeName = escapeSql(name);
-        String safeEmail = escapeSql(email);
-        String safeHash = escapeSql(hashed);
+        String safeName = Validation.escapeSql(name);
+        String safeEmail = Validation.escapeSql(email);
+        String safeHash = Validation.escapeSql(hashed);
 
         String insertSql = "insert into users(name, email, password_hash) values ('"
                 + safeName + "', '" + safeEmail + "', '" + safeHash + "')";
@@ -117,7 +114,7 @@ public class UserService {
      * Delete a user by email (for testing purposes)
      */
     public static void deleteByEmail(String email) {
-        String safeEmail = escapeSql(email);
+        String safeEmail = Validation.escapeSql(email);
         String sql = "delete from users where email = '" + safeEmail + "'";
 
         try {
