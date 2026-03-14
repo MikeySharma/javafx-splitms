@@ -117,3 +117,219 @@
 .status-success {
     -fx-text-fill: #1c8f4a;
 }
+
+.dashboard-root {
+    -fx-background-color: #eef5ff;
+}
+
+.dashboard-scroll {
+    -fx-background-color: transparent;
+    -fx-border-color: transparent;
+}
+
+.dashboard-scroll > .viewport {
+    -fx-background-color: transparent;
+}
+
+.dashboard-content {
+    -fx-background-color: transparent;
+}
+
+.dashboard-sidebar {
+    -fx-background-color: #f7fbff;
+    -fx-border-color: #c8daf7;
+    -fx-border-width: 0 1 0 0;
+}
+
+.dashboard-brand {
+    -fx-font-size: 32px;
+    -fx-font-weight: 800;
+    -fx-text-fill: #0c9f74;
+}
+
+.dashboard-nav-wrap {
+    -fx-padding: 8 0 0 0;
+}
+
+.dashboard-nav-link {
+    -fx-background-color: transparent;
+    -fx-text-fill: #4c688e;
+    -fx-font-size: 14px;
+    -fx-font-weight: 700;
+    -fx-padding: 10 12 10 12;
+    -fx-alignment: center-left;
+    -fx-background-radius: 8;
+    -fx-cursor: hand;
+}
+
+.dashboard-nav-link:hover {
+    -fx-background-color: #e8f1ff;
+}
+
+.dashboard-nav-active {
+    -fx-background-color: #dcf2ec;
+    -fx-text-fill: #16886a;
+    -fx-font-size: 14px;
+    -fx-font-weight: 700;
+    -fx-padding: 10 12 10 12;
+    -fx-alignment: center-left;
+    -fx-background-radius: 8;
+}
+
+.dashboard-avatar {
+    -fx-alignment: center;
+    -fx-min-width: 36;
+    -fx-min-height: 36;
+    -fx-background-radius: 18;
+    -fx-background-color: #d8ece6;
+    -fx-border-color: #b5ddd3;
+    -fx-border-radius: 18;
+    -fx-font-size: 14px;
+    -fx-font-weight: 700;
+    -fx-text-fill: #2f7b69;
+}
+
+.dashboard-user-chip {
+    -fx-background-color: #ffffff;
+    -fx-background-radius: 12;
+    -fx-border-color: #d2e2fa;
+    -fx-border-radius: 12;
+    -fx-padding: 10;
+}
+
+.dashboard-user-name {
+    -fx-font-size: 13px;
+    -fx-font-weight: 700;
+    -fx-text-fill: #1d3d67;
+}
+
+.dashboard-user-meta {
+    -fx-font-size: 11px;
+    -fx-text-fill: #5d789d;
+}
+
+.dashboard-title {
+    -fx-font-size: 42px;
+    -fx-font-weight: 800;
+    -fx-text-fill: #103467;
+}
+
+.dashboard-subtitle {
+    -fx-font-size: 15px;
+    -fx-text-fill: #4c688e;
+}
+
+.dashboard-stat-card {
+    -fx-background-color: #ffffff;
+    -fx-background-radius: 14;
+    -fx-border-color: #d2e2fa;
+    -fx-border-radius: 14;
+    -fx-padding: 18;
+}
+
+.dashboard-stat-positive {
+    -fx-background-color: #dff3e4;
+    -fx-border-color: #c2e5cc;
+}
+
+.dashboard-stat-label {
+    -fx-font-size: 15px;
+    -fx-font-weight: 700;
+    -fx-text-fill: #1f3f68;
+}
+
+.dashboard-stat-value-positive {
+    -fx-font-size: 40px;
+    -fx-font-weight: 800;
+    -fx-text-fill: #1f8d4f;
+}
+
+.dashboard-stat-value-neutral {
+    -fx-font-size: 40px;
+    -fx-font-weight: 800;
+    -fx-text-fill: #4b607c;
+}
+
+.dashboard-stat-subtext {
+    -fx-font-size: 14px;
+    -fx-text-fill: #567196;
+}
+
+.dashboard-pill {
+    -fx-background-color: #0f9b80;
+    -fx-background-radius: 999;
+    -fx-text-fill: #ffffff;
+    -fx-font-size: 12px;
+    -fx-font-weight: 700;
+    -fx-padding: 4 10 4 10;
+}
+
+.dashboard-panel {
+    -fx-background-color: #ffffff;
+    -fx-background-radius: 14;
+    -fx-border-color: #d2e2fa;
+    -fx-border-radius: 14;
+    -fx-padding: 16;
+}
+
+.dashboard-panel-title {
+    -fx-font-size: 30px;
+    -fx-font-weight: 800;
+    -fx-text-fill: #143b6f;
+}
+
+.dashboard-panel-subtitle {
+    -fx-font-size: 14px;
+    -fx-text-fill: #5d789d;
+}
+
+.dashboard-view-link {
+    -fx-background-color: transparent;
+    -fx-text-fill: #1b3663;
+    -fx-font-size: 13px;
+    -fx-font-weight: 700;
+    -fx-padding: 4 8 4 8;
+    -fx-cursor: hand;
+}
+
+.dashboard-list-item {
+    -fx-background-color: #f9fcff;
+    -fx-background-radius: 12;
+    -fx-border-color: #d8e7fc;
+    -fx-border-radius: 12;
+    -fx-padding: 12;
+}
+
+.dashboard-avatar-soft {
+    -fx-alignment: center;
+    -fx-min-width: 36;
+    -fx-min-height: 36;
+    -fx-background-radius: 18;
+    -fx-background-color: #eaf1f7;
+    -fx-text-fill: #2d6f88;
+    -fx-font-size: 14px;
+    -fx-font-weight: 700;
+}
+
+.dashboard-item-title {
+    -fx-font-size: 26px;
+    -fx-font-weight: 700;
+    -fx-text-fill: #193d6a;
+}
+
+.dashboard-item-positive {
+    -fx-font-size: 13px;
+    -fx-font-weight: 700;
+    -fx-text-fill: #1f8d4f;
+}
+
+.dashboard-item-neutral {
+    -fx-font-size: 13px;
+    -fx-font-weight: 600;
+    -fx-text-fill: #587195;
+}
+
+.dashboard-meta {
+    -fx-font-size: 12px;
+    -fx-text-fill: #60789b;
+}

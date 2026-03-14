@@ -91,6 +91,28 @@ public class UserService {
         }
     }
 
+    // load user data by ID
+    public boolean loadById(int userId) {
+        if (userId <= 0) {
+            return false;
+        }
+
+        String sql = "select id, name, email from users where id = " + userId + " limit 1";
+
+        try (ResultSet rs = Database.executeQuery(sql)) {
+            if (!rs.next()) {
+                return false;
+            }
+
+            this.userId = rs.getInt("id");
+            this.name = rs.getString("name");
+            this.email = rs.getString("email");
+            return true;
+        } catch (SQLException e) {
+            throw new RuntimeException("Database operation failed: " + e.getMessage(), e);
+        }
+    }
+
     /**
      * Delete a user by email (for testing purposes)
      */

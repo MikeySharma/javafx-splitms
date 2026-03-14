@@ -31,6 +31,10 @@ public class ViewNavigator {
         show("/com/splitms/views/register.fxml", "SplitMS - Register");
     }
 
+    public void showDashboard() {
+        show("/com/splitms/views/dashboard.fxml", "SplitMS - Dashboard");
+    }
+
     private void show(String fxmlPath, String title) {
         try {
             FXMLLoader loader = new FXMLLoader(getClass().getResource(fxmlPath));

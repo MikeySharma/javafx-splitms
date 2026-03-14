@@ -1,6 +1,7 @@
 package com.splitms.controllers;
 
 import com.splitms.pages.ViewNavigator;
+import com.splitms.services.SessionManager;
 import com.splitms.services.UserService;
 import com.splitms.utils.Normalize;
 import com.splitms.utils.Validation;
@@ -61,8 +62,15 @@ public class LoginController implements NavigatorAware {
         }
         messageLabel.setText("Login successful.");
 
+        SessionManager.getInstance().login(
+            userId,
+            userService.getUserName(),
+            userService.getUserEmail());
+
         emailField.clear();
         passwordField.clear();
+
+        navigator.showDashboard();
     }
 
     private void showError(String message) {
