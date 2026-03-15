@@ -5,7 +5,7 @@ import com.splitms.services.SessionManager;
 import javafx.fxml.FXML;
 import javafx.scene.control.Label;
 
-public class DashboardController implements NavigatorAware {
+public class GroupsController implements NavigatorAware {
 
     private ViewNavigator navigator;
     private final SessionManager sessionManager = SessionManager.getInstance();
@@ -18,9 +18,6 @@ public class DashboardController implements NavigatorAware {
 
     @FXML
     private Label userEmailLabel;
-
-    @FXML
-    private Label welcomeLabel;
 
     @Override
     public void setNavigator(ViewNavigator navigator) {
@@ -38,7 +35,6 @@ public class DashboardController implements NavigatorAware {
 
         if (name != null && !name.isBlank()) {
             userNameLabel.setText(name);
-            welcomeLabel.setText("Welcome back, " + name + "!");
             userAvatarLabel.setText(name.substring(0, 1).toUpperCase());
         }
 
@@ -49,14 +45,14 @@ public class DashboardController implements NavigatorAware {
 
     @FXML
     private void onDashboard() {
-        // Already on dashboard.
+        if (navigator != null) {
+            navigator.showDashboard();
+        }
     }
 
     @FXML
     private void onGroups() {
-        if (navigator != null) {
-            navigator.showGroups();
-        }
+        // Already on groups view.
     }
 
     @FXML

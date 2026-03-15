@@ -25,7 +25,7 @@ public class GroupsService {
         this.isPersonalDefault = isPersonalDefault;
     }
 
-    public boolean createDefaultPersonalGroupForUser(int userId) {
+    public static boolean createDefaultPersonalGroupForUser(int userId) {
         if (userId <= 0) {
             return false;
         }

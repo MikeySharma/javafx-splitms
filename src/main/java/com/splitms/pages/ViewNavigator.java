@@ -1,5 +1,6 @@
 package com.splitms.pages;
 
+import com.splitms.controllers.MainShellController;
 import com.splitms.controllers.NavigatorAware;
 import java.io.IOException;
 import javafx.fxml.FXMLLoader;
@@ -12,6 +13,8 @@ public class ViewNavigator {
     private final Stage stage;
     private final double width;
     private final double height;
+    private Scene shellScene;
+    private MainShellController shellController;
 
     public ViewNavigator(Stage stage, double width, double height) {
         this.stage = stage;
@@ -32,7 +35,35 @@ public class ViewNavigator {
     }
 
     public void showDashboard() {
-        show("/com/splitms/views/dashboard.fxml", "SplitMS - Dashboard");
+        ensureShellLoaded();
+        shellController.showDashboardContent();
+        stage.setTitle("SplitMS - Dashboard");
+        stage.setScene(shellScene);
+    }
+
+    public void showGroups() {
+        ensureShellLoaded();
+        shellController.showGroupsContent();
+        stage.setTitle("SplitMS - Groups");
+        stage.setScene(shellScene);
+    }
+
+    private void ensureShellLoaded() {
+        if (shellScene != null && shellController != null) {
+            return;
+        }
+
+        try {
+            FXMLLoader loader = new FXMLLoader(getClass().getResource("/com/splitms/views/main-shell.fxml"));
+            Parent root = loader.load();
+            shellController = loader.getController();
+            shellController.setNavigator(this);
+
+            shellScene = new Scene(root, width, height);
+            shellScene.getStylesheets().add(getClass().getResource("/com/splitms/styles/app.css").toExternalForm());
+        } catch (IOException e) {
+            throw new IllegalStateException("Failed to load shell view", e);
+        }
     }
 
     private void show(String fxmlPath, String title) {

@@ -25,7 +25,6 @@
 
             <VBox spacing="8.0" styleClass="dashboard-nav-wrap">
                 <Button maxWidth="1.7976931348623157E308" onAction="#onDashboard" styleClass="dashboard-nav-active" text="Dashboard" />
-                <Button maxWidth="1.7976931348623157E308" onAction="#onFriends" styleClass="dashboard-nav-link" text="Friends" />
                 <Button maxWidth="1.7976931348623157E308" onAction="#onGroups" styleClass="dashboard-nav-link" text="Groups" />
                 <Button maxWidth="1.7976931348623157E308" onAction="#onExpenses" styleClass="dashboard-nav-link" text="Expenses" />
             </VBox>

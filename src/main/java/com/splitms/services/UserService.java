@@ -79,6 +79,10 @@ public class UserService {
 
             this.name = name;
             this.email = email;
+
+            // Create default personal group for the new user
+            GroupsService.createDefaultPersonalGroupForUser(this.userId);
+
             return true;
         } catch (SQLException e) {
             this.userId = null;
