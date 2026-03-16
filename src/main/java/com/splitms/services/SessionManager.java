@@ -27,6 +27,11 @@ public final class SessionManager {
         this.userEmail = "";
     }
 
+    public void updateProfile(String userName, String userEmail) {
+        this.userName = userName == null ? "" : userName;
+        this.userEmail = userEmail == null ? "" : userEmail;
+    }
+
     public boolean isLoggedIn() {
         return userId != -1;
     }

@@ -1,141 +1,128 @@
 package com.splitms.services;
 
-import com.splitms.lib.Database;
+import com.splitms.interfaces.UserAuthService;
+import com.splitms.interfaces.UserProfileService;
+import com.splitms.models.UserAccount;
+import com.splitms.repositories.GroupRepository;
+import com.splitms.repositories.JdbcGroupRepository;
+import com.splitms.repositories.JdbcUserRepository;
+import com.splitms.repositories.UserRepository;
+import com.splitms.services.security.PasswordHasher;
+import com.splitms.services.security.Pbkdf2PasswordHasher;
+import com.splitms.utils.Normalize;
 import com.splitms.utils.Validation;
-import java.sql.ResultSet;
-import java.sql.SQLException;
+import java.util.Optional;
 
-public class UserService {
+public class UserService implements UserAuthService, UserProfileService {
 
-    // variable declarations
-    private Integer userId;
-    private String name;
-    private String email;
+    private final UserRepository userRepository;
+    private final GroupRepository groupRepository;
+    private final PasswordHasher passwordHasher;
 
-    // default constructor
     public UserService() {
-        this.userId = null;
-        this.name = "";
-        this.email = "";
+        this(new JdbcUserRepository(), new JdbcGroupRepository(), new Pbkdf2PasswordHasher());
     }
 
-    // parameterized constructor
-    public UserService(String name, String email, String password) {
-        this.userId = null;
-        this.name = name;
-        this.email = email;
+    public UserService(UserRepository userRepository, GroupRepository groupRepository, PasswordHasher passwordHasher) {
+        this.userRepository = userRepository;
+        this.groupRepository = groupRepository;
+        this.passwordHasher = passwordHasher;
     }
 
-    // helper method to hash passwords (for demonstration purposes only)
-    private static String hashPassword(String password) {
-        return Integer.toString(password.hashCode());
-    }
-
-    // login method
-    public int login(String email, String password) {
-        String hashed = hashPassword(password);
-        String safeEmail = Validation.escapeSql(email);
-        String sql = "select id, name, email, password_hash from users where email = '" + safeEmail + "' limit 1";
-
-        try (ResultSet rs = Database.executeQuery(sql)) {
-            if (!rs.next()) {
-                return -1;
-            }
-
-            if (hashed.equals(rs.getString("password_hash"))) {
-                this.userId = rs.getInt("id");
-                this.name = rs.getString("name");
-                this.email = rs.getString("email");
-                return userId;
-            }
-        } catch (SQLException e) {
-            throw new RuntimeException("Database operation failed: " + e.getMessage(), e);
+    @Override
+    public ServiceResult<UserAccount> login(String email, String password) {
+        String normalizedEmail = Normalize.normalizeEmail(email);
+        if (normalizedEmail.isEmpty() || password == null || password.isBlank()) {
+            return ServiceResult.fail("Email and password are required.");
         }
 
-        return -1;
-    }
-
-    // register method
-    public boolean register(String name, String email, String password) {
-        String hashed = hashPassword(password);
-        String safeName = Validation.escapeSql(name);
-        String safeEmail = Validation.escapeSql(email);
-        String safeHash = Validation.escapeSql(hashed);
-
-        String insertSql = "insert into users(name, email, password_hash) values ('"
-                + safeName + "', '" + safeEmail + "', '" + safeHash + "')";
-
-        try {
-            int rows = Database.executeUpdate(insertSql);
-            if (rows <= 0) {
-                return false;
-            }
-
-            try (ResultSet idResult = Database.executeQuery("select last_insert_id()")) {
-                if (idResult.next()) {
-                    this.userId = idResult.getInt(1);
-                }
-            }
-
-            this.name = name;
-            this.email = email;
-
-            // Create default personal group for the new user
-            GroupsService.createDefaultPersonalGroupForUser(this.userId);
-
-            return true;
-        } catch (SQLException e) {
-            this.userId = null;
-            this.name = "";
-            this.email = "";
-            return false;
+        Optional<UserRepository.UserAuthRecord> authRecord = userRepository.findAuthByEmail(normalizedEmail);
+        if (authRecord.isEmpty()) {
+            return ServiceResult.fail("Invalid email or password.");
         }
+
+        UserRepository.UserAuthRecord record = authRecord.get();
+        if (!passwordHasher.matches(password, record.passwordHash())) {
+            return ServiceResult.fail("Invalid email or password.");
+        }
+
+        UserAccount account = new UserAccount(record.userId(), record.name(), record.email());
+        return ServiceResult.ok("Login successful.", account);
     }
 
-    // load user data by ID
-    public boolean loadById(int userId) {
+    @Override
+    public ServiceResult<UserAccount> register(String name, String email, String password) {
+        String normalizedName = Normalize.normalizeText(name);
+        String normalizedEmail = Normalize.normalizeEmail(email);
+
+        if (normalizedName.isBlank() || normalizedEmail.isBlank() || password == null || password.isBlank()) {
+            return ServiceResult.fail("Please fill in all fields.");
+        }
+
+        if (!Validation.isValidEmail(normalizedEmail)) {
+            return ServiceResult.fail("Please enter a valid email address.");
+        }
+
+        if (userRepository.findByEmail(normalizedEmail).isPresent()) {
+            return ServiceResult.fail("Email already exists.");
+        }
+
+        String passwordHash = passwordHasher.hash(password);
+        int userId = userRepository.create(normalizedName, normalizedEmail, passwordHash);
         if (userId <= 0) {
-            return false;
+            return ServiceResult.fail("Registration failed.");
         }
 
-        String sql = "select id, name, email from users where id = " + userId + " limit 1";
+        int groupId = groupRepository.create(
+                userId,
+                "Personal Group",
+                "This is your personal default group.",
+                true);
 
-        try (ResultSet rs = Database.executeQuery(sql)) {
-            if (!rs.next()) {
-                return false;
-            }
-
-            this.userId = rs.getInt("id");
-            this.name = rs.getString("name");
-            this.email = rs.getString("email");
-            return true;
-        } catch (SQLException e) {
-            throw new RuntimeException("Database operation failed: " + e.getMessage(), e);
+        if (groupId <= 0) {
+            return ServiceResult.fail("Account created, but default group could not be created.");
         }
+
+        return ServiceResult.ok("Registration successful.", new UserAccount(userId, normalizedName, normalizedEmail));
     }
 
-    /**
-     * Delete a user by email (for testing purposes)
-     */
+    @Override
+    public ServiceResult<UserAccount> getProfile(int userId) {
+        if (userId <= 0) {
+            return ServiceResult.fail("Invalid user id.");
+        }
+
+        return userRepository.findById(userId)
+                .map(account -> ServiceResult.ok("Profile loaded.", account))
+                .orElseGet(() -> ServiceResult.fail("User not found."));
+    }
+
+    @Override
+    public ServiceResult<UserAccount> updateProfile(int userId, String name, String email) {
+        String normalizedName = Normalize.normalizeText(name);
+        String normalizedEmail = Normalize.normalizeEmail(email);
+
+        if (userId <= 0 || normalizedName.isBlank() || normalizedEmail.isBlank()) {
+            return ServiceResult.fail("Name and email are required.");
+        }
+
+        if (!Validation.isValidEmail(normalizedEmail)) {
+            return ServiceResult.fail("Please enter a valid email address.");
+        }
+
+        if (userRepository.existsByEmailExcludingUser(normalizedEmail, userId)) {
+            return ServiceResult.fail("Email is already in use by another account.");
+        }
+
+        boolean updated = userRepository.updateProfile(userId, normalizedName, normalizedEmail);
+        if (!updated) {
+            return ServiceResult.fail("Profile update failed.");
+        }
+
+        return ServiceResult.ok("Profile updated.", new UserAccount(userId, normalizedName, normalizedEmail));
+    }
+
     public static void deleteByEmail(String email) {
-        String safeEmail = Validation.escapeSql(email);
-        String sql = "delete from users where email = '" + safeEmail + "'";
-
-        try {
-            Database.executeUpdate(sql);
-        } catch (SQLException e) {
-            throw new RuntimeException("Database operation failed: " + e.getMessage(), e);
-        }
+        new JdbcUserRepository().deleteByEmail(Normalize.normalizeEmail(email));
     }
-
-    // getUserName method
-    public String getUserName() {
-        return this.name;
-    }
-
-    // getUserEmail method
-    public String getUserEmail() {
-        return this.email;
-    }
-
 }

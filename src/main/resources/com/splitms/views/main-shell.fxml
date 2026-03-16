@@ -26,6 +26,7 @@
             <VBox spacing="8.0" styleClass="dashboard-nav-wrap">
                 <Button fx:id="dashboardButton" maxWidth="1.7976931348623157E308" onAction="#onDashboard" styleClass="dashboard-nav-link" text="Dashboard" />
                 <Button fx:id="groupsButton" maxWidth="1.7976931348623157E308" onAction="#onGroups" styleClass="dashboard-nav-link" text="Groups" />
+                <Button fx:id="profileButton" maxWidth="1.7976931348623157E308" onAction="#onProfile" styleClass="dashboard-nav-link" text="Profile" />
                 <Button fx:id="expensesButton" maxWidth="1.7976931348623157E308" onAction="#onExpenses" styleClass="dashboard-nav-link" text="Expenses" />
             </VBox>
 
@@ -38,6 +39,8 @@
                     <Label fx:id="userEmailLabel" styleClass="dashboard-user-meta" text="guest@splitms.local" />
                 </VBox>
             </HBox>
+
+            <Button fx:id="logoutButton" maxWidth="1.7976931348623157E308" onAction="#onLogout" styleClass="outline-button" text="Logout" />
         </VBox>
     </left>
 

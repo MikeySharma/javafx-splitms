@@ -2,6 +2,7 @@ package com.splitms.pages;
 
 import com.splitms.controllers.MainShellController;
 import com.splitms.controllers.NavigatorAware;
+import com.splitms.services.SessionManager;
 import java.io.IOException;
 import javafx.fxml.FXMLLoader;
 import javafx.scene.Parent;
@@ -35,6 +36,9 @@ public class ViewNavigator {
     }
 
     public void showDashboard() {
+        if (!ensureLoggedIn()) {
+            return;
+        }
         ensureShellLoaded();
         shellController.showDashboardContent();
         stage.setTitle("SplitMS - Dashboard");
@@ -42,10 +46,32 @@ public class ViewNavigator {
     }
 
     public void showGroups() {
+        if (!ensureLoggedIn()) {
+            return;
+        }
         ensureShellLoaded();
         shellController.showGroupsContent();
         stage.setTitle("SplitMS - Groups");
         stage.setScene(shellScene);
+    }
+
+    public void showProfile() {
+        if (!ensureLoggedIn()) {
+            return;
+        }
+        ensureShellLoaded();
+        shellController.showProfileContent();
+        stage.setTitle("SplitMS - Profile");
+        stage.setScene(shellScene);
+    }
+
+    private boolean ensureLoggedIn() {
+        if (SessionManager.getInstance().isLoggedIn()) {
+            return true;
+        }
+
+        showLogin();
+        return false;
     }
 
     private void ensureShellLoaded() {

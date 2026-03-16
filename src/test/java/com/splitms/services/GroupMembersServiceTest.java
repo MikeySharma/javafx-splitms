@@ -4,14 +4,13 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
 
-import java.sql.ResultSet;
-import java.sql.SQLException;
+import com.splitms.models.GroupMemberView;
+import com.splitms.models.GroupModel;
+import com.splitms.models.UserAccount;
 import java.util.List;
 
 import org.junit.Before;
 import org.junit.Test;
-
-import com.splitms.lib.Database;
 
 public class GroupMembersServiceTest {
 
@@ -23,6 +22,7 @@ public class GroupMembersServiceTest {
 
     private GroupMembersService groupMembersService;
     private GroupsService groupsService;
+    private UserService userService;
     private int ownerUserId;
     private int friendUserId;
     private int groupId;
@@ -31,15 +31,22 @@ public class GroupMembersServiceTest {
     public void setUp() {
         groupMembersService = new GroupMembersService();
         groupsService = new GroupsService();
+        userService = new UserService();
 
-        cleanupByEmail(FRIEND_EMAIL);
-        cleanupByEmail(OWNER_EMAIL);
+        UserService.deleteByEmail(FRIEND_EMAIL);
+        UserService.deleteByEmail(OWNER_EMAIL);
 
-        ownerUserId = registerAndLogin(OWNER_NAME, OWNER_EMAIL, PASSWORD);
-        friendUserId = registerAndLogin(FRIEND_NAME, FRIEND_EMAIL, PASSWORD);
+        ServiceResult<UserAccount> ownerRegister = userService.register(OWNER_NAME, OWNER_EMAIL, PASSWORD);
+        ServiceResult<UserAccount> friendRegister = userService.register(FRIEND_NAME, FRIEND_EMAIL, PASSWORD);
+        assertTrue("Owner registration should succeed", ownerRegister.success());
+        assertTrue("Friend registration should succeed", friendRegister.success());
 
-        assertTrue("Owner group should be created", groupsService.createDefaultPersonalGroupForUser(ownerUserId));
-        groupId = fetchLatestGroupIdByOwner(ownerUserId);
+        ownerUserId = ownerRegister.data().userId();
+        friendUserId = friendRegister.data().userId();
+
+        ServiceResult<List<GroupModel>> ownerGroups = groupsService.listGroupsForUser(ownerUserId, "");
+        assertTrue("Owner groups should load", ownerGroups.success());
+        groupId = ownerGroups.data().get(0).groupId();
         assertTrue("Group id should be valid", groupId > 0);
     }
 
@@ -59,7 +66,8 @@ public class GroupMembersServiceTest {
     @Test
     public void testRemoveMember() {
         assertTrue("First add should succeed", groupMembersService.addMember(groupId, friendUserId));
-        assertTrue("Remove should succeed", groupMembersService.removeMember(groupId, friendUserId));
+        ServiceResult<Void> removeResult = groupMembersService.removeMember(groupId, friendUserId);
+        assertTrue("Remove should succeed", removeResult.success());
         assertFalse("Member should no longer exist", groupMembersService.isMember(groupId, friendUserId));
     }
 
@@ -82,48 +90,11 @@ public class GroupMembersServiceTest {
         assertEquals("No groups for invalid user", 0, groupMembersService.getGroupIdsForUser(0).size());
     }
 
-    private static int registerAndLogin(String name, String email, String password) {
-        UserService user = new UserService();
-        if (!user.register(name, email, password)) {
-            throw new RuntimeException("Failed to register test user: " + email);
-        }
-
-        int userId = user.login(email, password);
-        if (userId <= 0) {
-            throw new RuntimeException("Failed to login test user: " + email);
-        }
-        return userId;
-    }
-
-    private static int fetchLatestGroupIdByOwner(int ownerUserId) {
-        String sql = "SELECT group_id FROM `group` WHERE user_id = " + ownerUserId
-                + " ORDER BY group_id DESC LIMIT 1";
-
-        try (ResultSet rs = Database.executeQuery(sql)) {
-            if (!rs.next()) {
-                return -1;
-            }
-            return rs.getInt("group_id");
-        } catch (SQLException e) {
-            throw new RuntimeException("Failed to fetch owner group", e);
-        }
-    }
-
-    private static void cleanupByEmail(String email) {
-        String safeEmail = email.replace("'", "''");
-        String userIdSql = "SELECT id FROM users WHERE email = '" + safeEmail + "' LIMIT 1";
-
-        try (ResultSet rs = Database.executeQuery(userIdSql)) {
-            if (!rs.next()) {
-                return;
-            }
-
-            int userId = rs.getInt("id");
-            Database.executeUpdate("DELETE FROM group_members WHERE user_id = " + userId);
-            Database.executeUpdate("DELETE FROM `group` WHERE user_id = " + userId);
-            Database.executeUpdate("DELETE FROM users WHERE id = " + userId);
-        } catch (SQLException e) {
-            throw new RuntimeException("Failed cleaning test user", e);
-        }
+    @Test
+    public void testListMembersContract() {
+        assertTrue("Add should succeed", groupMembersService.addMember(groupId, friendUserId));
+        ServiceResult<List<GroupMemberView>> membersResult = groupMembersService.listMembers(groupId);
+        assertTrue("List members should succeed", membersResult.success());
+        assertFalse("Members should not be empty", membersResult.data().isEmpty());
     }
 }

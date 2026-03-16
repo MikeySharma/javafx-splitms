@@ -8,12 +8,17 @@
         <class>com.splitms.entities.UserEntity</class>
         <class>com.splitms.entities.GroupsEntity</class>
         <class>com.splitms.entities.GroupMemberEntity</class>
+        <class>com.splitms.entities.CategoryEntity</class>
+        <class>com.splitms.entities.ExpenseEntity</class>
+        <class>com.splitms.entities.ExpenseSplitEntity</class>
+        <class>com.splitms.entities.TransactionEntity</class>
         <properties>
-            <property name="jakarta.persistence.jdbc.driver" value="com.mysql.cj.jdbc.Driver"/>
-            <property name="jakarta.persistence.jdbc.url" value="jdbc:mysql://localhost:3306/splitms?useSSL=false&amp;allowPublicKeyRetrieval=true&amp;serverTimezone=UTC"/>
-            <property name="jakarta.persistence.jdbc.user" value="splitms"/>
-            <property name="jakarta.persistence.jdbc.password" value="splitms"/>
-            <property name="hibernate.hbm2ddl.auto" value="validate"/>
+            <property name="jakarta.persistence.jdbc.driver" value="com.mysql.cj.jdbc.Driver" />
+            <property name="jakarta.persistence.jdbc.url"
+                value="jdbc:mysql://localhost:3306/splitms?useSSL=false&amp;allowPublicKeyRetrieval=true&amp;serverTimezone=UTC" />
+            <property name="jakarta.persistence.jdbc.user" value="splitms" />
+            <property name="jakarta.persistence.jdbc.password" value="splitms" />
+            <property name="hibernate.hbm2ddl.auto" value="validate" />
         </properties>
     </persistence-unit>
 </persistence>

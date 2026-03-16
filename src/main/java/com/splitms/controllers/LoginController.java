@@ -1,8 +1,11 @@
 package com.splitms.controllers;
 
 import com.splitms.pages.ViewNavigator;
+import com.splitms.services.ApplicationServices;
+import com.splitms.services.ServiceResult;
 import com.splitms.services.SessionManager;
 import com.splitms.services.UserService;
+import com.splitms.models.UserAccount;
 import com.splitms.utils.Normalize;
 import com.splitms.utils.Validation;
 import javafx.fxml.FXML;
@@ -13,6 +16,7 @@ import javafx.scene.control.TextField;
 public class LoginController implements NavigatorAware {
 
     private ViewNavigator navigator;
+    private final UserService userService = ApplicationServices.userService();
 
     @FXML
     private TextField emailField;
@@ -48,13 +52,13 @@ public class LoginController implements NavigatorAware {
             return;
         }
 
-        UserService userService = new UserService();
-        int userId = userService.login(email, password);
-
-        if (userId == -1) {
-            showError("Invalid email or password.");
+        ServiceResult<UserAccount> result = userService.login(email, password);
+        if (!result.success() || result.data() == null) {
+            showError(result.message());
             return;
         }
+
+        UserAccount account = result.data();
 
         messageLabel.getStyleClass().remove("status-error");
         if (!messageLabel.getStyleClass().contains("status-success")) {
@@ -63,9 +67,9 @@ public class LoginController implements NavigatorAware {
         messageLabel.setText("Login successful.");
 
         SessionManager.getInstance().login(
-            userId,
-            userService.getUserName(),
-            userService.getUserEmail());
+            account.userId(),
+            account.name(),
+            account.email());
 
         emailField.clear();
         passwordField.clear();

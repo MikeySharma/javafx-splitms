@@ -41,6 +41,8 @@ public class GroupsController implements NavigatorAware {
         if (email != null && !email.isBlank()) {
             userEmailLabel.setText(email);
         }
+        
+
     }
 
     @FXML
