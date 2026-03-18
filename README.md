@@ -401,3 +401,179 @@ mvn test
 | `ExpensesServiceTest` | `ExpensesService` (including split-sum validation) |
 | `CategoriesServiceTest` | `CategoriesService` |
 | `TransactionsServiceTest` | `TransactionsService` (including settle flow) |
+
+---
+
+## List of Figures
+
+1. Layered architecture of SplitMS (UI, Controller, Service, Repository, Database)
+2. Package structure mapped to src layout (controllers, services, repositories, entities, models, lib, utils)
+3. Sequence diagram for createExpenseWithSplits flow (Controller to Service to Repository to Database)
+
+---
+
+## Figure 1. Layered architecture of SplitMS (UI, Controller, Service, Repository, Database)
+
+```mermaid
+flowchart TB
+  UI["UI Layer\nJavaFX Views (FXML)\nmain-shell.fxml, groups-content.fxml"]
+  CTRL["Controller Layer\nIndexController, LoginController, RegisterController\nMainShellController, GroupsContentController"]
+  SVC["Service Layer\nUserService, GroupsService, GroupMembersService\nExpensesService, CategoriesService, TransactionsService\nServiceResult<T>"]
+  REPO["Repository Layer\nJdbcUserRepository, JdbcGroupRepository\nJdbcExpenseRepository, JdbcExpenseSplitRepository\nJdbcCategoryRepository, JdbcTransactionRepository"]
+  DBLIB["Database Access Layer\nlib.Database (JDBC)\nlib.Jpa (EntityManagerFactory)"]
+  DB[("MySQL Database\nusers, group, group_members, categories\nexpenses, expense_splits, transactions")]
+
+  APP["ApplicationServices\nService wiring (service locator)"]
+  SESSION["SessionManager\nCurrent logged-in user context"]
+
+  UI --> CTRL
+  CTRL --> SVC
+  CTRL --> SESSION
+  SVC --> REPO
+  SVC --> APP
+  REPO --> DBLIB
+  DBLIB --> DB
+```
+
+---
+
+## Figure 2. Package structure mapped to src layout (controllers, services, repositories, entities, models, lib, utils)
+
+```mermaid
+flowchart LR
+  subgraph SRC["src/main/java/com/splitms"]
+    subgraph PAGES["pages"]
+      APPMAIN["SplitmsApplication"]
+      NAV["ViewNavigator"]
+    end
+
+    subgraph CONTROLLERS["controllers"]
+      C1["LoginController"]
+      C2["RegisterController"]
+      C3["MainShellController"]
+      C4["GroupsContentController"]
+      C5["ProfileContentController"]
+    end
+
+    subgraph SERVICES["services"]
+      S1["UserService"]
+      S2["GroupsService"]
+      S3["GroupMembersService"]
+      S4["ExpensesService"]
+      S5["CategoriesService"]
+      S6["TransactionsService"]
+      S7["ApplicationServices"]
+      S8["SessionManager"]
+    end
+
+    subgraph REPOSITORIES["repositories"]
+      R1["JdbcUserRepository"]
+      R2["JdbcGroupRepository"]
+      R3["JdbcGroupMembershipRepository"]
+      R4["JdbcExpenseRepository"]
+      R5["JdbcExpenseSplitRepository"]
+      R6["JdbcCategoryRepository"]
+      R7["JdbcTransactionRepository"]
+    end
+
+    subgraph ENTITIES["entities"]
+      E1["UserEntity"]
+      E2["GroupsEntity"]
+      E3["GroupMemberEntity"]
+      E4["CategoryEntity"]
+      E5["ExpenseEntity"]
+      E6["ExpenseSplitEntity"]
+      E7["TransactionEntity"]
+    end
+
+    subgraph MODELS["models"]
+      M1["UserAccount"]
+      M2["GroupModel"]
+      M3["GroupMemberView"]
+      M4["CategoryModel"]
+      M5["ExpenseModel"]
+      M6["ExpenseSplitModel"]
+      M7["TransactionModel"]
+    end
+
+    subgraph LIB["lib"]
+      L1["Database"]
+      L2["Jpa"]
+    end
+
+    subgraph UTILS["utils"]
+      U1["EnvConfig"]
+      U2["Normalize"]
+      U3["Validation"]
+      U4["SystemInfo"]
+    end
+  end
+
+  APPMAIN --> NAV
+  NAV --> C1
+  NAV --> C3
+  C1 --> S1
+  C2 --> S1
+  C3 --> C4
+  C4 --> S2
+  C4 --> S3
+  S4 --> R4
+  S4 --> R5
+  SERVICES --> MODELS
+  SERVICES --> UTILS
+  REPOSITORIES --> LIB
+  REPOSITORIES --> ENTITIES
+```
+
+---
+
+## Figure 3. Sequence diagram for createExpenseWithSplits flow (Controller to Service to Repository to Database)
+
+```mermaid
+sequenceDiagram
+  autonumber
+  actor Caller as Controller/UI Caller
+  participant ES as ExpensesService
+  participant ER as JdbcExpenseRepository
+  participant SR as JdbcExpenseSplitRepository
+  participant DB as MySQL
+
+  Caller->>ES: createExpenseWithSplits(groupId, payerId, categoryId, amount, expenseDate, description, splits)
+
+  alt splits is null or empty
+    ES-->>Caller: ServiceResult.fail("At least one split is required.")
+  else splits present
+    ES->>ES: sum split.shareAmount values
+    alt sum != amount
+      ES-->>Caller: ServiceResult.fail("Split amounts must equal expense amount")
+    else sum == amount
+      ES->>ES: createExpense(...)
+      ES->>ER: create(groupId, payerId, categoryId, amount, expenseDate, safeDescription)
+      ER->>DB: INSERT INTO expenses (...)
+      DB-->>ER: generated expense_id
+      ER-->>ES: expenseId
+
+      alt invalid ids/amount/date or create failed
+        ES-->>Caller: ServiceResult.fail(...)
+      else expense created
+        loop for each ExpenseSplitModel in splits
+          ES->>SR: create(expenseId, userId, shareAmount, sharePercentage)
+          SR->>DB: INSERT INTO expense_splits (...)
+          DB-->>SR: generated split_id
+          SR-->>ES: splitId
+          alt splitId <= 0
+            ES-->>Caller: ServiceResult.fail("Expense created but a split could not be saved.")
+          end
+        end
+
+        ES->>ER: findById(expenseId)
+        ER->>DB: SELECT * FROM expenses WHERE expense_id = ?
+        DB-->>ER: expense row
+        ER-->>ES: Optional<ExpenseModel>
+        ES-->>Caller: ServiceResult.ok("Expense with splits created.", expenseModel)
+      end
+    end
+  end
+```
+
+Note: The current production controllers do not directly call createExpenseWithSplits yet. The caller above represents the intended controller entry point while the service-repository-database interaction is based on the implemented code path.
