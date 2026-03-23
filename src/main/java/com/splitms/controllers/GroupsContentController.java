@@ -1,103 +1,54 @@
 package com.splitms.controllers;
 
-import com.splitms.models.GroupMemberView;
 import com.splitms.models.GroupModel;
 import com.splitms.services.ApplicationServices;
-import com.splitms.services.GroupMembersService;
+import com.splitms.services.ExpensesService;
 import com.splitms.services.GroupsService;
 import com.splitms.services.ServiceResult;
 import com.splitms.services.SessionManager;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
+import java.util.function.Consumer;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.fxml.FXML;
-import javafx.scene.control.Alert;
-import javafx.scene.control.Button;
 import javafx.scene.control.ButtonType;
 import javafx.scene.control.Dialog;
 import javafx.scene.control.Label;
-import javafx.scene.control.ListCell;
-import javafx.scene.control.ListView;
+import javafx.scene.control.Separator;
 import javafx.scene.control.TextField;
+import javafx.scene.layout.FlowPane;
 import javafx.scene.layout.GridPane;
+import javafx.scene.layout.HBox;
+import javafx.scene.layout.Priority;
+import javafx.scene.layout.Region;
+import javafx.scene.layout.VBox;
 
 public class GroupsContentController {
 
     private final GroupsService groupsService = ApplicationServices.groupsService();
-    private final GroupMembersService membersService = ApplicationServices.groupMembersService();
+    private final ExpensesService expensesService = new ExpensesService();
     private final SessionManager sessionManager = SessionManager.getInstance();
 
     private final ObservableList<GroupModel> groups = FXCollections.observableArrayList();
-    private final ObservableList<GroupMemberView> members = FXCollections.observableArrayList();
+    private final Map<Integer, Integer> expenseCountByGroup = new HashMap<>();
 
-    @FXML
-    private TextField searchField;
-
-    @FXML
-    private Label groupNameLabel;
-
-    @FXML
-    private Label groupDescriptionLabel;
+    private GroupModel selectedGroup;
+    private Consumer<GroupModel> onGroupOpenRequest;
 
     @FXML
     private Label statusLabel;
 
     @FXML
-    private TextField memberEmailField;
-
-    @FXML
-    private ListView<GroupModel> groupsListView;
-
-    @FXML
-    private ListView<GroupMemberView> membersListView;
-
-    @FXML
-    private Button editGroupButton;
-
-    @FXML
-    private Button deleteGroupButton;
-
-    @FXML
-    private Button addMemberButton;
-
-    @FXML
-    private Button removeMemberButton;
+    private FlowPane groupsCardsContainer;
 
     @FXML
     private void initialize() {
-        groupsListView.setItems(groups);
-        membersListView.setItems(members);
-
-        groupsListView.setCellFactory(list -> new ListCell<>() {
-            @Override
-            protected void updateItem(GroupModel item, boolean empty) {
-                super.updateItem(item, empty);
-                if (empty || item == null) {
-                    setText(null);
-                    return;
-                }
-                setText(item.groupName() + "  (" + item.memberCount() + " members)");
-            }
+        groupsCardsContainer.widthProperty().addListener((obs, oldValue, newValue) -> {
+            groupsCardsContainer.setPrefWrapLength(Math.max(640.0, newValue.doubleValue() - 12.0));
         });
-
-        membersListView.setCellFactory(list -> new ListCell<>() {
-            @Override
-            protected void updateItem(GroupMemberView item, boolean empty) {
-                super.updateItem(item, empty);
-                if (empty || item == null) {
-                    setText(null);
-                    return;
-                }
-                setText(item.name() + " <" + item.email() + ">");
-            }
-        });
-
-        groupsListView.getSelectionModel().selectedItemProperty().addListener((obs, oldValue, newValue) -> {
-            refreshGroupDetails(newValue);
-        });
-
-        searchField.textProperty().addListener((obs, oldValue, newValue) -> loadGroups());
 
         loadGroups();
     }
@@ -121,142 +72,109 @@ public class GroupsContentController {
 
         showSuccess(result.message());
         loadGroups();
-        groupsListView.getSelectionModel().select(result.data());
-    }
-
-    @FXML
-    private void onEditGroup() {
-        GroupModel selected = groupsListView.getSelectionModel().getSelectedItem();
-        if (selected == null) {
-            showError("Select a group first.");
-            return;
+        if (result.data() != null) {
+            selectGroupById(result.data().groupId());
         }
-
-        Optional<GroupInput> input = showGroupDialog("Edit Group", selected.groupName(), selected.description());
-        if (input.isEmpty()) {
-            return;
-        }
-
-        ServiceResult<GroupModel> result = groupsService.updateGroup(
-                selected.groupId(),
-                sessionManager.getUserId(),
-                input.get().name(),
-                input.get().description());
-
-        if (!result.success()) {
-            showError(result.message());
-            return;
-        }
-
-        showSuccess(result.message());
-        loadGroups();
-        groupsListView.getSelectionModel().select(result.data());
-    }
-
-    @FXML
-    private void onDeleteGroup() {
-        GroupModel selected = groupsListView.getSelectionModel().getSelectedItem();
-        if (selected == null) {
-            showError("Select a group first.");
-            return;
-        }
-
-        Alert confirm = new Alert(Alert.AlertType.CONFIRMATION);
-        confirm.setTitle("Delete Group");
-        confirm.setHeaderText("Delete " + selected.groupName() + "?");
-        confirm.setContentText("This action cannot be undone.");
-
-        Optional<ButtonType> confirmResult = confirm.showAndWait();
-        if (confirmResult.isEmpty() || confirmResult.get() != ButtonType.OK) {
-            return;
-        }
-
-        ServiceResult<Void> result = groupsService.deleteGroup(selected.groupId(), sessionManager.getUserId());
-        if (!result.success()) {
-            showError(result.message());
-            return;
-        }
-
-        showSuccess(result.message());
-        loadGroups();
-    }
-
-    @FXML
-    private void onAddMember() {
-        GroupModel selectedGroup = groupsListView.getSelectionModel().getSelectedItem();
-        if (selectedGroup == null) {
-            showError("Select a group first.");
-            return;
-        }
-
-        ServiceResult<Void> result = membersService.addMemberByEmail(selectedGroup.groupId(), memberEmailField.getText());
-        if (!result.success()) {
-            showError(result.message());
-            return;
-        }
-
-        memberEmailField.clear();
-        showSuccess(result.message());
-        loadMembers(selectedGroup.groupId());
-        loadGroups();
-    }
-
-    @FXML
-    private void onRemoveMember() {
-        GroupModel selectedGroup = groupsListView.getSelectionModel().getSelectedItem();
-        GroupMemberView selectedMember = membersListView.getSelectionModel().getSelectedItem();
-
-        if (selectedGroup == null || selectedMember == null) {
-            showError("Select both a group and a member.");
-            return;
-        }
-
-        ServiceResult<Void> result = membersService.removeMember(selectedGroup.groupId(), selectedMember.userId());
-        if (!result.success()) {
-            showError(result.message());
-            return;
-        }
-
-        showSuccess(result.message());
-        loadMembers(selectedGroup.groupId());
-        loadGroups();
     }
 
     private void loadGroups() {
         ServiceResult<List<GroupModel>> result = groupsService.listGroupsForUser(
                 sessionManager.getUserId(),
-                searchField.getText());
+                null);
 
         groups.setAll(result.data() == null ? List.of() : result.data());
-        if (!groups.isEmpty()) {
-            groupsListView.getSelectionModel().selectFirst();
-        } else {
-            refreshGroupDetails(null);
-        }
+        expenseCountByGroup.clear();
+        renderGroupCards();
     }
 
-    private void refreshGroupDetails(GroupModel group) {
-        boolean hasSelection = group != null;
-        editGroupButton.setDisable(!hasSelection);
-        deleteGroupButton.setDisable(!hasSelection);
-        addMemberButton.setDisable(!hasSelection);
-        removeMemberButton.setDisable(!hasSelection);
+    private void renderGroupCards() {
+        groupsCardsContainer.getChildren().clear();
 
-        if (!hasSelection) {
-            groupNameLabel.setText("No group selected");
-            groupDescriptionLabel.setText("Choose a group from the left list.");
-            members.clear();
+        if (groups.isEmpty()) {
+            Label emptyState = new Label("No groups found.");
+            emptyState.getStyleClass().add("groups-empty-state");
+            groupsCardsContainer.getChildren().add(emptyState);
             return;
         }
 
-        groupNameLabel.setText(group.groupName());
-        groupDescriptionLabel.setText(group.description());
-        loadMembers(group.groupId());
+        for (GroupModel group : groups) {
+            VBox card = buildGroupCard(group);
+            groupsCardsContainer.getChildren().add(card);
+        }
     }
 
-    private void loadMembers(int groupId) {
-        ServiceResult<List<GroupMemberView>> result = membersService.listMembers(groupId);
-        members.setAll(result.data() == null ? List.of() : result.data());
+    private VBox buildGroupCard(GroupModel group) {
+        Label icon = new Label("[]");
+        icon.getStyleClass().add("groups-card-icon-text");
+
+        Label name = new Label(group.groupName());
+        name.getStyleClass().add("groups-card-title");
+
+        HBox titleRow = new HBox(8.0, icon, name);
+
+        Label description = new Label(group.description());
+        description.getStyleClass().add("groups-card-description");
+        description.setWrapText(true);
+
+        VBox topContent = new VBox(8.0, titleRow, description);
+
+        Region bodySpacer = new Region();
+        VBox.setVgrow(bodySpacer, Priority.ALWAYS);
+
+        Separator divider = new Separator();
+        divider.getStyleClass().add("groups-card-divider");
+
+        int expenseCount = expenseCountByGroup.computeIfAbsent(group.groupId(), this::loadExpenseCount);
+        Label membersMeta = new Label("Members: " + group.memberCount());
+        membersMeta.getStyleClass().add("groups-card-meta");
+
+        Label expensesMeta = new Label("Expenses: " + expenseCount);
+        expensesMeta.getStyleClass().add("groups-card-meta-count");
+
+        Region footerSpacer = new Region();
+        HBox.setHgrow(footerSpacer, Priority.ALWAYS);
+        HBox footerRow = new HBox(8.0, membersMeta, footerSpacer, expensesMeta);
+
+        VBox card = new VBox(9.0, topContent, bodySpacer, divider, footerRow);
+        card.getStyleClass().add("groups-group-card");
+        card.setPrefWidth(388.0);
+        card.setPrefHeight(200);
+        if (selectedGroup != null && selectedGroup.groupId() == group.groupId()) {
+            card.getStyleClass().add("groups-group-card-selected");
+        }
+
+        card.setOnMouseClicked(event -> openGroup(group));
+        return card;
+    }
+
+    private void openGroup(GroupModel group) {
+        selectedGroup = group;
+        renderGroupCards();
+        if (onGroupOpenRequest != null) {
+            onGroupOpenRequest.accept(group);
+        }
+    }
+
+    private int loadExpenseCount(int groupId) {
+        ServiceResult<List<com.splitms.models.ExpenseModel>> result = expensesService.listExpensesForGroup(groupId);
+        if (!result.success() || result.data() == null) {
+            return 0;
+        }
+        return result.data().size();
+    }
+
+    private void selectGroupById(int groupId) {
+        GroupModel targetGroup = groups.stream()
+                .filter(group -> group.groupId() == groupId)
+                .findFirst()
+                .orElse(null);
+        if (targetGroup != null) {
+            openGroup(targetGroup);
+        }
+    }
+
+    public void setOnGroupOpenRequest(Consumer<GroupModel> onGroupOpenRequest) {
+        this.onGroupOpenRequest = onGroupOpenRequest;
     }
 
     private Optional<GroupInput> showGroupDialog(String title, String initialName, String initialDescription) {
