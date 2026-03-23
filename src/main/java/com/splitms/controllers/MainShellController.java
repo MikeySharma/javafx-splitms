@@ -1,8 +1,10 @@
 package com.splitms.controllers;
 
+import com.splitms.models.GroupModel;
 import com.splitms.pages.ViewNavigator;
 import com.splitms.services.SessionManager;
 import java.io.IOException;
+import java.util.function.Consumer;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
 import javafx.scene.Node;
@@ -14,6 +16,7 @@ public class MainShellController implements NavigatorAware {
 
     private static final String DASHBOARD_CONTENT = "/com/splitms/views/dashboard-content.fxml";
     private static final String GROUPS_CONTENT = "/com/splitms/views/groups-content.fxml";
+    private static final String GROUP_DETAILS_CONTENT = "/com/splitms/views/group-details-content.fxml";
     private static final String PROFILE_CONTENT = "/com/splitms/views/profile-content.fxml";
 
     private ViewNavigator navigator;
@@ -52,7 +55,21 @@ public class MainShellController implements NavigatorAware {
     }
 
     public void showGroupsContent() {
-        setCenterContent(GROUPS_CONTENT);
+        setCenterContent(GROUPS_CONTENT, controller -> {
+            if (controller instanceof GroupsContentController groupsContentController) {
+                groupsContentController.setOnGroupOpenRequest(this::showGroupDetailsContent);
+            }
+        });
+        setActiveNav(groupsButton);
+    }
+
+    public void showGroupDetailsContent(GroupModel group) {
+        setCenterContent(GROUP_DETAILS_CONTENT, controller -> {
+            if (controller instanceof GroupDetailsContentController detailsController) {
+                detailsController.setOnBackRequest(this::showGroupsContent);
+                detailsController.loadGroup(group);
+            }
+        });
         setActiveNav(groupsButton);
     }
 
@@ -80,6 +97,10 @@ public class MainShellController implements NavigatorAware {
     }
 
     private void setCenterContent(String resourcePath) {
+        setCenterContent(resourcePath, null);
+    }
+
+    private void setCenterContent(String resourcePath, Consumer<Object> controllerInitializer) {
         try {
             FXMLLoader loader = new FXMLLoader(getClass().getResource(resourcePath));
             Node content = loader.load();
@@ -91,6 +112,9 @@ public class MainShellController implements NavigatorAware {
             if (controller instanceof ProfileContentController profileContentController) {
                 profileContentController.setOnProfileUpdated(this::loadUserOnShellOpen);
                 profileContentController.loadProfile();
+            }
+            if (controllerInitializer != null) {
+                controllerInitializer.accept(controller);
             }
 
             contentContainer.getChildren().setAll(content);

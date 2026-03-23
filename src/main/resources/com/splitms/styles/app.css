@@ -339,90 +339,160 @@
 }
 
 .groups-title {
-    -fx-font-size: 50px;
+    -fx-font-size: 46px;
     -fx-font-weight: 800;
-    -fx-text-fill: #0e315f;
+    -fx-text-fill: #0d2947;
 }
 
 .groups-subtitle {
     -fx-font-size: 15px;
-    -fx-text-fill: #5d789d;
+    -fx-text-fill: #586b84;
 }
 
 .groups-create-button {
-    -fx-background-color: #0d9a7f;
+    -fx-background-color: #0b9a7d;
     -fx-text-fill: #ffffff;
     -fx-font-size: 14px;
     -fx-font-weight: 700;
     -fx-background-radius: 10;
-    -fx-padding: 10 18 10 18;
+    -fx-padding: 10 20 10 20;
     -fx-cursor: hand;
 }
 
 .groups-create-button:hover {
-    -fx-background-color: #0a8a71;
+    -fx-background-color: #09866d;
 }
 
 .groups-search-input {
-    -fx-background-color: #f7fbff;
-    -fx-border-color: #d2deed;
+    -fx-background-color: #fdfefe;
+    -fx-border-color: #dae2ea;
     -fx-border-radius: 10;
     -fx-background-radius: 10;
     -fx-padding: 10 14 10 14;
     -fx-font-size: 14px;
-    -fx-prompt-text-fill: #7a8fa9;
+    -fx-prompt-text-fill: #8090a4;
 }
 
-.groups-card {
-    -fx-background-color: #ffffff;
-    -fx-background-radius: 14;
-    -fx-border-color: #d7dfeb;
-    -fx-border-radius: 14;
-    -fx-padding: 18;
+.groups-cards-scroll {
+    -fx-background-color: transparent;
+    -fx-background-insets: 0;
+    -fx-padding: 0;
+    -fx-border-color: transparent;
 }
 
-.groups-card-icon {
-    -fx-min-width: 18;
-    -fx-min-height: 14;
-    -fx-max-width: 18;
-    -fx-max-height: 14;
-    -fx-border-color: #0a9176;
-    -fx-border-width: 2;
-    -fx-border-radius: 3;
+.groups-cards-scroll > .viewport {
     -fx-background-color: transparent;
 }
 
+.groups-cards-grid {
+    -fx-background-color: transparent;
+}
+
+.groups-group-card {
+    -fx-background-color: #ffffff;
+    -fx-background-radius: 14;
+    -fx-border-color: #d8e0e7;
+    -fx-border-radius: 14;
+    -fx-padding: 16;
+    -fx-cursor: hand;
+}
+
+.groups-group-card:hover {
+    -fx-border-color: #b8cad7;
+    -fx-background-color: #fbfdfd;
+}
+
+.groups-group-card-selected {
+    -fx-border-color: #0b9a7d;
+    -fx-background-color: #f7fffc;
+}
+
+.groups-card-icon-text {
+    -fx-font-size: 15px;
+    -fx-font-weight: 800;
+    -fx-text-fill: #0a8b72;
+}
+
 .groups-card-title {
-    -fx-font-size: 18px;
+    -fx-font-size: 20px;
     -fx-font-weight: 700;
-    -fx-text-fill: #12385f;
+    -fx-text-fill: #12263f;
 }
 
 .groups-card-description {
-    -fx-font-size: 13px;
-    -fx-text-fill: #647c97;
-}
-
-.groups-card .separator .line {
-    -fx-border-color: #e1e6ef;
+    -fx-font-size: 14px;
+    -fx-text-fill: #617386;
 }
 
 .groups-card-meta {
-    -fx-font-size: 13px;
-    -fx-text-fill: #4d678c;
+    -fx-font-size: 14px;
+    -fx-text-fill: #5c6f82;
 }
 
 .groups-card-meta-count {
-    -fx-font-size: 13px;
+    -fx-font-size: 14px;
     -fx-font-weight: 700;
-    -fx-text-fill: #17395d;
+    -fx-text-fill: #132a46;
+}
+
+.groups-card-divider .line {
+    -fx-border-color: #dfe5eb;
 }
 
 .groups-balance-pill {
-    -fx-background-color: #0d9a7f;
+    -fx-background-color: #0b9a7d;
     -fx-text-fill: #ffffff;
     -fx-font-size: 13px;
     -fx-font-weight: 700;
     -fx-background-radius: 999;
-    -fx-padding: 8 16 8 16;
+    -fx-padding: 8 14 8 14;
+    -fx-alignment: center;
+}
+
+.groups-detail-card {
+    -fx-background-color: #ffffff;
+    -fx-background-radius: 14;
+    -fx-border-color: #d8e0e7;
+    -fx-border-radius: 14;
+    -fx-padding: 14;
+}
+
+.groups-empty-state {
+    -fx-font-size: 13px;
+    -fx-text-fill: #6a7f95;
+    -fx-padding: 16;
+}
+
+.danger-button {
+    -fx-border-color: #d45757;
+    -fx-text-fill: #c33f3f;
+}
+
+.group-details-page-content {
+    -fx-padding: 0;
+}
+
+.group-details-stat-card {
+    -fx-background-color: #ffffff;
+    -fx-background-radius: 12;
+    -fx-border-color: #d8e0e7;
+    -fx-border-radius: 12;
+    -fx-padding: 12;
+}
+
+.group-details-stat-title {
+    -fx-font-size: 13px;
+    -fx-text-fill: #5e7288;
+}
+
+.group-details-stat-value {
+    -fx-font-size: 20px;
+    -fx-font-weight: 700;
+    -fx-text-fill: #12263f;
+}
+
+.group-details-list-title {
+    -fx-font-size: 14px;
+    -fx-font-weight: 700;
+    -fx-text-fill: #223852;
 }

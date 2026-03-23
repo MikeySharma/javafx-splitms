@@ -3,9 +3,8 @@
 <?import javafx.geometry.Insets?>
 <?import javafx.scene.control.Button?>
 <?import javafx.scene.control.Label?>
-<?import javafx.scene.control.ListView?>
-<?import javafx.scene.control.SplitPane?>
-<?import javafx.scene.control.TextField?>
+<?import javafx.scene.control.ScrollPane?>
+<?import javafx.scene.layout.FlowPane?>
 <?import javafx.scene.layout.HBox?>
 <?import javafx.scene.layout.Region?>
 <?import javafx.scene.layout.VBox?>
@@ -13,10 +12,10 @@
 <VBox xmlns="http://javafx.com/javafx/25"
       xmlns:fx="http://javafx.com/fxml/1"
       fx:controller="com.splitms.controllers.GroupsContentController"
-      spacing="14.0"
+            spacing="16.0"
       styleClass="dashboard-content groups-page-content">
     <padding>
-        <Insets top="24.0" right="20.0" bottom="24.0" left="18.0" />
+                <Insets top="24.0" right="22.0" bottom="24.0" left="18.0" />
     </padding>
 
     <HBox alignment="CENTER_LEFT">
@@ -28,34 +27,15 @@
         <Button onAction="#onCreateGroup" styleClass="groups-create-button" text="+  Create Group" />
     </HBox>
 
-    <TextField fx:id="searchField" promptText="Search groups..." styleClass="groups-search-input" />
+    <Label fx:id="statusLabel" styleClass="status-label" text="" />
 
-    <Label fx:id="statusLabel" styleClass="status-label" text="Select a group to manage members." />
-
-    <SplitPane dividerPositions="0.38">
-        <items>
-            <VBox spacing="10.0" styleClass="groups-card">
-                <Label styleClass="groups-card-title" text="Your Groups" />
-                <ListView fx:id="groupsListView" prefHeight="420.0" />
-                <HBox spacing="8.0">
-                    <Button fx:id="editGroupButton" disable="true" onAction="#onEditGroup" styleClass="outline-button" text="Edit" />
-                    <Button fx:id="deleteGroupButton" disable="true" onAction="#onDeleteGroup" styleClass="outline-button" text="Delete" />
-                </HBox>
-            </VBox>
-
-            <VBox spacing="10.0" styleClass="groups-card">
-                <Label fx:id="groupNameLabel" styleClass="groups-card-title" text="No group selected" />
-                <Label fx:id="groupDescriptionLabel" styleClass="groups-card-description" text="Choose a group from the left list." />
-
-                <HBox spacing="8.0">
-                    <TextField fx:id="memberEmailField" promptText="Friend email" />
-                    <Button fx:id="addMemberButton" disable="true" onAction="#onAddMember" styleClass="groups-create-button" text="Add" />
-                </HBox>
-
-                <Label styleClass="groups-card-meta" text="Members" />
-                <ListView fx:id="membersListView" prefHeight="360.0" />
-                <Button fx:id="removeMemberButton" disable="true" onAction="#onRemoveMember" styleClass="outline-button" text="Remove Selected Member" />
-            </VBox>
-        </items>
-    </SplitPane>
+    <ScrollPane fitToWidth="true" hbarPolicy="NEVER" styleClass="groups-cards-scroll" VBox.vgrow="ALWAYS">
+        <content>
+            <FlowPane fx:id="groupsCardsContainer" hgap="14.0" vgap="14.0" prefWrapLength="860.0" styleClass="groups-cards-grid">
+                <padding>
+                    <Insets top="2.0" right="2.0" bottom="2.0" left="2.0" />
+                </padding>
+            </FlowPane>
+        </content>
+    </ScrollPane>
 </VBox>
