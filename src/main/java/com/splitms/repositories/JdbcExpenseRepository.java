@@ -18,10 +18,10 @@ public class JdbcExpenseRepository implements ExpenseRepository {
 
     @Override
     public int create(int groupId, int payerId, int categoryId, BigDecimal amount,
-            LocalDate expenseDate, String description) {
+            LocalDate expenseDate, String title, String description) {
         String sql = """
-                INSERT INTO expenses (group_id, payer_id, category_id, amount, expense_date, description)
-                VALUES (?, ?, ?, ?, ?, ?)
+                INSERT INTO expenses (group_id, payer_id, category_id, amount, expense_date, title, description)
+                VALUES (?, ?, ?, ?, ?, ?, ?)
                 """;
 
         try (PreparedStatement ps = connection().prepareStatement(sql, Statement.RETURN_GENERATED_KEYS)) {
@@ -30,7 +30,8 @@ public class JdbcExpenseRepository implements ExpenseRepository {
             ps.setInt(3, categoryId);
             ps.setBigDecimal(4, amount);
             ps.setDate(5, Date.valueOf(expenseDate));
-            ps.setString(6, description);
+            ps.setString(6, title);
+            ps.setString(7, description);
 
             int rows = ps.executeUpdate();
             if (rows <= 0) {
@@ -51,7 +52,7 @@ public class JdbcExpenseRepository implements ExpenseRepository {
     @Override
     public Optional<ExpenseModel> findById(int expenseId) {
         String sql = """
-                SELECT expense_id, group_id, payer_id, category_id, amount, expense_date, description
+                SELECT expense_id, group_id, payer_id, category_id, amount, expense_date, title, description
                 FROM expenses WHERE expense_id = ?
                 """;
 
@@ -71,7 +72,7 @@ public class JdbcExpenseRepository implements ExpenseRepository {
     @Override
     public List<ExpenseModel> findByGroup(int groupId) {
         String sql = """
-                SELECT expense_id, group_id, payer_id, category_id, amount, expense_date, description
+                SELECT expense_id, group_id, payer_id, category_id, amount, expense_date, title, description
                 FROM expenses WHERE group_id = ? ORDER BY expense_date DESC
                 """;
 
@@ -108,9 +109,9 @@ public class JdbcExpenseRepository implements ExpenseRepository {
 
     @Override
     public boolean update(int expenseId, int categoryId, BigDecimal amount,
-            LocalDate expenseDate, String description) {
+            LocalDate expenseDate, String title, String description) {
         String sql = """
-                UPDATE expenses SET category_id = ?, amount = ?, expense_date = ?, description = ?
+                UPDATE expenses SET category_id = ?, amount = ?, expense_date = ?, title = ?, description = ?
                 WHERE expense_id = ?
                 """;
 
@@ -118,8 +119,9 @@ public class JdbcExpenseRepository implements ExpenseRepository {
             ps.setInt(1, categoryId);
             ps.setBigDecimal(2, amount);
             ps.setDate(3, Date.valueOf(expenseDate));
-            ps.setString(4, description);
-            ps.setInt(5, expenseId);
+            ps.setString(4, title);
+            ps.setString(5, description);
+            ps.setInt(6, expenseId);
             return ps.executeUpdate() > 0;
         } catch (SQLException e) {
             throw new RuntimeException("Failed to update expense", e);
@@ -146,6 +148,7 @@ public class JdbcExpenseRepository implements ExpenseRepository {
                 rs.getInt("category_id"),
                 rs.getBigDecimal("amount"),
                 rs.getDate("expense_date").toLocalDate(),
+                rs.getString("title"),
                 rs.getString("description"));
     }
 

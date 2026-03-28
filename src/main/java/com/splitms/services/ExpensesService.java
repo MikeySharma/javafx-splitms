@@ -49,7 +49,8 @@ public class ExpensesService implements ExpenseService {
 
     @Override
     public ServiceResult<ExpenseModel> createExpense(int groupId, int payerId, int categoryId,
-            BigDecimal amount, LocalDate expenseDate, String description) {
+            BigDecimal amount, LocalDate expenseDate, String title, String description) {
+        String normalizedTitle = Normalize.normalizeText(title);
         String normalizedDescription = Normalize.normalizeText(description);
 
         if (groupId <= 0 || payerId <= 0 || categoryId <= 0) {
@@ -62,9 +63,10 @@ public class ExpensesService implements ExpenseService {
             return ServiceResult.fail("Expense date is required.");
         }
 
+        String safeTitle = normalizedTitle.isBlank() ? "Expense" : normalizedTitle;
         String safeDescription = normalizedDescription.isBlank() ? "No description" : normalizedDescription;
 
-        int expenseId = expenseRepository.create(groupId, payerId, categoryId, amount, expenseDate, safeDescription);
+        int expenseId = expenseRepository.create(groupId, payerId, categoryId, amount, expenseDate, safeTitle, safeDescription);
         if (expenseId <= 0) {
             return ServiceResult.fail("Could not create expense.");
         }
@@ -76,7 +78,7 @@ public class ExpensesService implements ExpenseService {
 
     @Override
     public ServiceResult<ExpenseModel> createExpenseWithSplits(int groupId, int payerId,
-            int categoryId, BigDecimal amount, LocalDate expenseDate, String description,
+            int categoryId, BigDecimal amount, LocalDate expenseDate, String title, String description,
             List<ExpenseSplitModel> splits) {
 
         if (splits == null || splits.isEmpty()) {
@@ -93,7 +95,7 @@ public class ExpensesService implements ExpenseService {
         }
 
         ServiceResult<ExpenseModel> createResult = createExpense(
-                groupId, payerId, categoryId, amount, expenseDate, description);
+                groupId, payerId, categoryId, amount, expenseDate, title, description);
         if (!createResult.success()) {
             return createResult;
         }
@@ -114,7 +116,8 @@ public class ExpensesService implements ExpenseService {
 
     @Override
     public ServiceResult<ExpenseModel> updateExpense(int expenseId, int categoryId,
-            BigDecimal amount, LocalDate expenseDate, String description) {
+            BigDecimal amount, LocalDate expenseDate, String title, String description) {
+        String normalizedTitle = Normalize.normalizeText(title);
         String normalizedDescription = Normalize.normalizeText(description);
 
         if (expenseId <= 0 || categoryId <= 0) {
@@ -127,9 +130,10 @@ public class ExpensesService implements ExpenseService {
             return ServiceResult.fail("Expense date is required.");
         }
 
+        String safeTitle = normalizedTitle.isBlank() ? "Expense" : normalizedTitle;
         String safeDescription = normalizedDescription.isBlank() ? "No description" : normalizedDescription;
 
-        boolean updated = expenseRepository.update(expenseId, categoryId, amount, expenseDate, safeDescription);
+        boolean updated = expenseRepository.update(expenseId, categoryId, amount, expenseDate, safeTitle, safeDescription);
         if (!updated) {
             return ServiceResult.fail("Expense update failed.");
         }
@@ -151,5 +155,23 @@ public class ExpensesService implements ExpenseService {
         }
 
         return ServiceResult.ok("Expense deleted.", null);
+    }
+
+    public ServiceResult<List<ExpenseSplitModel>> listExpenseSplitsForUser(int userId) {
+        if (userId <= 0) {
+            return ServiceResult.fail("Invalid user id.");
+        }
+
+        List<ExpenseSplitModel> splits = splitRepository.findByUser(userId);
+        return ServiceResult.ok("Expense splits loaded.", splits);
+    }
+
+    public ServiceResult<List<ExpenseSplitModel>> listExpenseSplitsForExpense(int expenseId) {
+        if (expenseId <= 0) {
+            return ServiceResult.fail("Invalid expense id.");
+        }
+
+        List<ExpenseSplitModel> splits = splitRepository.findByExpense(expenseId);
+        return ServiceResult.ok("Expense splits loaded.", splits);
     }
 }

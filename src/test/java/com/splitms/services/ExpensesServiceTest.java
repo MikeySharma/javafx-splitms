@@ -43,7 +43,7 @@ public class ExpensesServiceTest {
         LocalDate today = LocalDate.now();
 
         ServiceResult<ExpenseModel> createResult = expensesService.createExpense(
-                groupId, payerUserId, categoryId, amount, today, "Team lunch");
+                groupId, payerUserId, categoryId, amount, today, "Lunch", "Team lunch");
         assertTrue("Expense create should succeed", createResult.success());
         assertNotNull("Created expense should be returned", createResult.data());
         int expenseId = createResult.data().expenseId();
@@ -56,7 +56,7 @@ public class ExpensesServiceTest {
 
         BigDecimal newAmount = new BigDecimal("75.00");
         ServiceResult<ExpenseModel> updateResult = expensesService.updateExpense(
-                expenseId, categoryId, newAmount, today, "Team dinner");
+                expenseId, categoryId, newAmount, today, "Dinner", "Team dinner");
         assertTrue("Expense update should succeed", updateResult.success());
         assertEquals("Updated amount should match", 0, newAmount.compareTo(updateResult.data().amount()));
         assertEquals("Updated description should match", "Team dinner", updateResult.data().description());
@@ -72,9 +72,9 @@ public class ExpensesServiceTest {
     public void testListExpensesForGroup() {
         LocalDate today = LocalDate.now();
         ServiceResult<ExpenseModel> e1 = expensesService.createExpense(
-                groupId, payerUserId, categoryId, new BigDecimal("30.00"), today, "Coffee");
+                groupId, payerUserId, categoryId, new BigDecimal("30.00"), today, "Coffee", "Coffee");
         ServiceResult<ExpenseModel> e2 = expensesService.createExpense(
-                groupId, payerUserId, categoryId, new BigDecimal("50.00"), today, "Groceries");
+                groupId, payerUserId, categoryId, new BigDecimal("50.00"), today, "Groceries", "Groceries");
         assertTrue("First expense create should succeed", e1.success());
         assertTrue("Second expense create should succeed", e2.success());
 
@@ -94,7 +94,7 @@ public class ExpensesServiceTest {
                 new ExpenseSplitModel(0, 0, friendUserId, new BigDecimal("50.00"), 50.0f));
 
         ServiceResult<ExpenseModel> result = expensesService.createExpenseWithSplits(
-                groupId, payerUserId, categoryId, total, today, "Split dinner", splits);
+                groupId, payerUserId, categoryId, total, today, "Dinner", "Split dinner", splits);
 
         assertTrue("Expense with matching splits should succeed", result.success());
         assertNotNull("Expense data should be returned", result.data());
@@ -111,22 +111,63 @@ public class ExpensesServiceTest {
                 new ExpenseSplitModel(0, 0, friendUserId, new BigDecimal("40.00"), 40.0f));
 
         ServiceResult<ExpenseModel> result = expensesService.createExpenseWithSplits(
-                groupId, payerUserId, categoryId, total, today, "Mismatched split", splits);
+                groupId, payerUserId, categoryId, total, today, "Dinner", "Mismatched split", splits);
 
         assertFalse("Splits that do not sum to expense amount should fail", result.success());
     }
 
+        @Test
+        public void testListExpenseSplitsForUserAndExpense() {
+                BigDecimal total = new BigDecimal("90.00");
+                LocalDate today = LocalDate.now();
+
+                List<ExpenseSplitModel> splits = List.of(
+                                new ExpenseSplitModel(0, 0, payerUserId, new BigDecimal("30.00"), 33.33f),
+                                new ExpenseSplitModel(0, 0, friendUserId, new BigDecimal("60.00"), 66.67f));
+
+                ServiceResult<ExpenseModel> createResult = expensesService.createExpenseWithSplits(
+                                groupId, payerUserId, categoryId, total, today, "Taxi", "Airport taxi", splits);
+                assertTrue("Expense with splits should be created", createResult.success());
+                assertNotNull("Created expense should exist", createResult.data());
+
+                int expenseId = createResult.data().expenseId();
+
+                ServiceResult<List<ExpenseSplitModel>> byExpense = expensesService.listExpenseSplitsForExpense(expenseId);
+                assertTrue("Listing splits by expense should succeed", byExpense.success());
+                assertEquals("Expense should have 2 splits", 2, byExpense.data().size());
+
+                ServiceResult<List<ExpenseSplitModel>> byPayer = expensesService.listExpenseSplitsForUser(payerUserId);
+                assertTrue("Listing splits by user should succeed", byPayer.success());
+                assertEquals("Payer should have exactly 1 split for this setup", 1, byPayer.data().size());
+                assertEquals("Payer split should belong to created expense", expenseId, byPayer.data().get(0).expenseId());
+
+                ServiceResult<List<ExpenseSplitModel>> byFriend = expensesService.listExpenseSplitsForUser(friendUserId);
+                assertTrue("Listing friend splits should succeed", byFriend.success());
+                assertEquals("Friend should have exactly 1 split", 1, byFriend.data().size());
+                assertEquals("Friend split amount should be 60", 0,
+                                new BigDecimal("60.00").compareTo(byFriend.data().get(0).shareAmount()));
+        }
+
+        @Test
+        public void testListExpenseSplitsValidationFailsForInvalidIds() {
+                ServiceResult<List<ExpenseSplitModel>> byInvalidUser = expensesService.listExpenseSplitsForUser(0);
+                assertFalse("Invalid user id should fail", byInvalidUser.success());
+
+                ServiceResult<List<ExpenseSplitModel>> byInvalidExpense = expensesService.listExpenseSplitsForExpense(0);
+                assertFalse("Invalid expense id should fail", byInvalidExpense.success());
+        }
+
     @Test
     public void testCreateExpenseWithZeroAmountFails() {
         ServiceResult<ExpenseModel> result = expensesService.createExpense(
-                groupId, payerUserId, categoryId, BigDecimal.ZERO, LocalDate.now(), "Zero cost");
+                groupId, payerUserId, categoryId, BigDecimal.ZERO, LocalDate.now(), "Free", "Zero cost");
         assertFalse("Zero amount should fail", result.success());
     }
 
     @Test
     public void testCreateExpenseWithInvalidGroupFails() {
         ServiceResult<ExpenseModel> result = expensesService.createExpense(
-                0, payerUserId, categoryId, new BigDecimal("10.00"), LocalDate.now(), "Bad group");
+                0, payerUserId, categoryId, new BigDecimal("10.00"), LocalDate.now(), "Bad", "Bad group");
         assertFalse("Invalid group id should fail", result.success());
     }
 
@@ -136,9 +177,9 @@ public class ExpensesServiceTest {
 
                 @Override
                 public int create(int groupId, int payerId, int categoryId, BigDecimal amount,
-                                LocalDate expenseDate, String description) {
+                                LocalDate expenseDate, String title, String description) {
                         int id = sequence++;
-                        expenses.put(id, new ExpenseModel(id, groupId, payerId, categoryId, amount, expenseDate, description));
+                        expenses.put(id, new ExpenseModel(id, groupId, payerId, categoryId, amount, expenseDate, title, description));
                         return id;
                 }
 
@@ -165,7 +206,7 @@ public class ExpensesServiceTest {
 
                 @Override
                 public boolean update(int expenseId, int categoryId, BigDecimal amount,
-                                LocalDate expenseDate, String description) {
+                                LocalDate expenseDate, String title, String description) {
                         ExpenseModel current = expenses.get(expenseId);
                         if (current == null) {
                                 return false;
@@ -177,6 +218,7 @@ public class ExpensesServiceTest {
                                         categoryId,
                                         amount,
                                         expenseDate,
+                                        title,
                                         description));
                         return true;
                 }
@@ -208,6 +250,17 @@ public class ExpensesServiceTest {
                         List<ExpenseSplitModel> result = new ArrayList<>();
                         for (ExpenseSplitModel split : splits.values()) {
                                 if (split.expenseId() == expenseId) {
+                                        result.add(split);
+                                }
+                        }
+                        return result;
+                }
+
+                @Override
+                public List<ExpenseSplitModel> findByUser(int userId) {
+                        List<ExpenseSplitModel> result = new ArrayList<>();
+                        for (ExpenseSplitModel split : splits.values()) {
+                                if (split.userId() == userId) {
                                         result.add(split);
                                 }
                         }

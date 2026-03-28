@@ -17,15 +17,21 @@ public class UserService implements UserAuthService, UserProfileService {
 
     private final UserRepository userRepository;
     private final GroupRepository groupRepository;
+    private final GroupMembersService groupMembersService;
     private final PasswordHasher passwordHasher;
 
     public UserService() {
-        this(new JdbcUserRepository(), new JdbcGroupRepository(), new Pbkdf2PasswordHasher());
+        this(new JdbcUserRepository(), new JdbcGroupRepository(), null, new Pbkdf2PasswordHasher());
     }
 
     public UserService(UserRepository userRepository, GroupRepository groupRepository, PasswordHasher passwordHasher) {
+        this(userRepository, groupRepository, null, passwordHasher);
+    }
+
+    public UserService(UserRepository userRepository, GroupRepository groupRepository, GroupMembersService groupMembersService, PasswordHasher passwordHasher) {
         this.userRepository = userRepository;
         this.groupRepository = groupRepository;
+        this.groupMembersService = groupMembersService;
         this.passwordHasher = passwordHasher;
     }
 
@@ -81,6 +87,11 @@ public class UserService implements UserAuthService, UserProfileService {
 
         if (groupId <= 0) {
             return ServiceResult.fail("Account created, but default group could not be created.");
+        }
+
+        // Automatically add the user as a member of their default personal group
+        if (groupMembersService != null) {
+            groupMembersService.addMember(groupId, userId);
         }
 
         return ServiceResult.ok("Registration successful.", new UserAccount(userId, normalizedName, normalizedEmail));
