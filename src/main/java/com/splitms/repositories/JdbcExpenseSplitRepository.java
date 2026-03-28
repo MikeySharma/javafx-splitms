@@ -76,6 +76,24 @@ public class JdbcExpenseSplitRepository implements ExpenseSplitRepository {
     }
 
     @Override
+    public List<ExpenseSplitModel> findByUser(int userId) {
+        String sql = "SELECT split_id, expense_id, user_id, share_amount, share_percentage FROM expense_splits WHERE user_id = ?";
+
+        List<ExpenseSplitModel> splits = new ArrayList<>();
+        try (PreparedStatement ps = connection().prepareStatement(sql)) {
+            ps.setInt(1, userId);
+            try (ResultSet rs = ps.executeQuery()) {
+                while (rs.next()) {
+                    splits.add(map(rs));
+                }
+            }
+            return splits;
+        } catch (SQLException e) {
+            throw new RuntimeException("Failed to list expense splits for user", e);
+        }
+    }
+
+    @Override
     public BigDecimal sumShareAmountByExpense(int expenseId) {
         String sql = "SELECT COALESCE(SUM(share_amount), 0) AS total FROM expense_splits WHERE expense_id = ?";
 

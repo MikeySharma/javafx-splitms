@@ -9,13 +9,19 @@ import java.util.List;
 
 public class GroupsService implements GroupService {
     private final GroupRepository groupRepository;
+    private final GroupMembersService groupMembersService;
 
     public GroupsService() {
-        this(new JdbcGroupRepository());
+        this(new JdbcGroupRepository(), null);
     }
 
     public GroupsService(GroupRepository groupRepository) {
+        this(groupRepository, null);
+    }
+
+    public GroupsService(GroupRepository groupRepository, GroupMembersService groupMembersService) {
         this.groupRepository = groupRepository;
+        this.groupMembersService = groupMembersService;
     }
 
     @Override
@@ -44,6 +50,11 @@ public class GroupsService implements GroupService {
         int groupId = groupRepository.create(userId, normalizedName, safeDescription, false);
         if (groupId <= 0) {
             return ServiceResult.fail("Could not create group.");
+        }
+
+        // Automatically add creator as a group member
+        if (groupMembersService != null) {
+            groupMembersService.addMember(groupId, userId);
         }
 
         return groupRepository.findByIdAndOwner(groupId, userId)
@@ -78,6 +89,12 @@ public class GroupsService implements GroupService {
     public ServiceResult<Void> deleteGroup(int groupId, int ownerUserId) {
         if (groupId <= 0 || ownerUserId <= 0) {
             return ServiceResult.fail("Invalid group id.");
+        }
+
+        // Check if the group is a personal default group
+        var groupOption = groupRepository.findByIdAndOwner(groupId, ownerUserId);
+        if (groupOption.isPresent() && groupOption.get().personalDefault()) {
+            return ServiceResult.fail("Personal default groups cannot be deleted. You can only edit them.");
         }
 
         boolean deleted = groupRepository.delete(groupId, ownerUserId);

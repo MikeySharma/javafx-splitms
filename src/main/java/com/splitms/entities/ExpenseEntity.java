@@ -31,6 +31,9 @@ public class ExpenseEntity {
     @Column(name = "expense_date", nullable = false)
     private LocalDate expenseDate;
 
+    @Column(name = "title", nullable = false, length = 255)
+    private String title;
+
     @Column(name = "description", nullable = false, length = 500)
     private String description;
 
@@ -56,12 +59,13 @@ public class ExpenseEntity {
     }
 
     public ExpenseEntity(GroupsEntity group, UserEntity payer, CategoryEntity category,
-            BigDecimal amount, LocalDate expenseDate, String description) {
+            BigDecimal amount, LocalDate expenseDate, String title, String description) {
         this.group = group;
         this.payer = payer;
         this.category = category;
         this.amount = amount;
         this.expenseDate = expenseDate;
+        this.title = title;
         this.description = description;
     }
 
@@ -75,6 +79,10 @@ public class ExpenseEntity {
 
     public LocalDate getExpenseDate() {
         return expenseDate;
+    }
+
+    public String getTitle() {
+        return title;
     }
 
     public String getDescription() {

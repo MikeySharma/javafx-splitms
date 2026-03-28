@@ -8,7 +8,7 @@ import java.util.Optional;
 
 public interface ExpenseRepository {
     int create(int groupId, int payerId, int categoryId, BigDecimal amount,
-            LocalDate expenseDate, String description);
+            LocalDate expenseDate, String title, String description);
 
     Optional<ExpenseModel> findById(int expenseId);
 
@@ -17,7 +17,7 @@ public interface ExpenseRepository {
     Optional<BigDecimal> findAmountById(int expenseId);
 
     boolean update(int expenseId, int categoryId, BigDecimal amount,
-            LocalDate expenseDate, String description);
+            LocalDate expenseDate, String title, String description);
 
     boolean delete(int expenseId);
 }

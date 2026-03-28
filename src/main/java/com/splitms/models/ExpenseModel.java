@@ -10,5 +10,6 @@ public record ExpenseModel(
         int categoryId,
         BigDecimal amount,
         LocalDate expenseDate,
+        String title,
         String description) {
 }

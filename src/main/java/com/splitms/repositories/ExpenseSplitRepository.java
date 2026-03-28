@@ -12,6 +12,8 @@ public interface ExpenseSplitRepository {
 
     List<ExpenseSplitModel> findByExpense(int expenseId);
 
+    List<ExpenseSplitModel> findByUser(int userId);
+
     BigDecimal sumShareAmountByExpense(int expenseId);
 
     boolean deleteAllForExpense(int expenseId);
