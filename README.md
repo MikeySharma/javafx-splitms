@@ -58,7 +58,22 @@ DB_PASSWORD=<your_password>
 mvn flyway:migrate
 ```
 
-**4. Run the app:**
+**4. (Optional) Seed test data:**
+
+Populate the database with sample users, groups, and expenses for quick feature testing:
+
+```bash
+mvn exec:java -Dexec.mainClass="com.splitms.utils.DataSeeder"
+```
+
+This creates:
+- **Main account:** `mikey@mikey.com` (password: `mikey`)
+- **Test members:** `alice@test.com`, `bob@test.com`, `charlie@test.com` (password: `password123`)
+- **3 sample groups** with 7+ expenses and splits so you can immediately test features without manual data entry
+
+> **Note:** The seeder automatically cleans up previous test data on re-run, so it's safe to use multiple times.
+
+**5. Run the app:**
 ```bash
 mvn clean javafx:run
 ```
