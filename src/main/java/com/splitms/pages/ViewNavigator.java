@@ -65,6 +65,16 @@ public class ViewNavigator {
         stage.setScene(shellScene);
     }
 
+    public void showExpenses() {
+        if (!ensureLoggedIn()) {
+            return;
+        }
+        ensureShellLoaded();
+        shellController.showExpensesContent();
+        stage.setTitle("SplitMS - Expenses");
+        stage.setScene(shellScene);
+    }
+
     private boolean ensureLoggedIn() {
         if (SessionManager.getInstance().isLoggedIn()) {
             return true;

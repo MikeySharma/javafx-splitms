@@ -18,6 +18,7 @@ public class MainShellController implements NavigatorAware {
     private static final String GROUPS_CONTENT = "/com/splitms/views/groups-content.fxml";
     private static final String GROUP_DETAILS_CONTENT = "/com/splitms/views/group-details-content.fxml";
     private static final String PROFILE_CONTENT = "/com/splitms/views/profile-content.fxml";
+    private static final String EXPENSES_CONTENT = "/com/splitms/views/expenses-content.fxml";
 
     private ViewNavigator navigator;
     private final SessionManager sessionManager = SessionManager.getInstance();
@@ -42,6 +43,9 @@ public class MainShellController implements NavigatorAware {
 
     @FXML
     private Button profileButton;
+
+    @FXML
+    private Button expensesButton;
 
     @Override
     public void setNavigator(ViewNavigator navigator) {
@@ -76,6 +80,11 @@ public class MainShellController implements NavigatorAware {
     public void showProfileContent() {
         setCenterContent(PROFILE_CONTENT);
         setActiveNav(profileButton);
+    }
+
+    public void showExpensesContent() {
+        setCenterContent(EXPENSES_CONTENT);
+        setActiveNav(expensesButton);
     }
 
     private void loadUserOnShellOpen() {
@@ -127,6 +136,7 @@ public class MainShellController implements NavigatorAware {
         dashboardButton.getStyleClass().setAll("dashboard-nav-link");
         groupsButton.getStyleClass().setAll("dashboard-nav-link");
         profileButton.getStyleClass().setAll("dashboard-nav-link");
+        expensesButton.getStyleClass().setAll("dashboard-nav-link");
 
         if (activeButton != null) {
             activeButton.getStyleClass().setAll("dashboard-nav-active");
@@ -156,7 +166,9 @@ public class MainShellController implements NavigatorAware {
 
     @FXML
     private void onExpenses() {
-        // Placeholder for future expenses view navigation.
+        if (navigator != null) {
+            navigator.showExpenses();
+        }
     }
 
     @FXML

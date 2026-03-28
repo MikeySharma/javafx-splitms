@@ -14,7 +14,9 @@ import java.math.BigDecimal;
 import java.math.RoundingMode;
 import java.time.LocalDate;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 /**
  * Data seeder script to populate test data for quick feature testing.
@@ -153,13 +155,7 @@ public class DataSeeder {
      */
     private static void populatePersonalGroupExpenses(int mainUserId) {
         ExpensesService expensesService = ApplicationServices.expensesService();
-        JdbcCategoryRepository categoryRepo = new JdbcCategoryRepository();
-        int foodCategoryId = categoryRepo.findAll()
-                .stream()
-                .filter(cat -> "Food & Dining".equals(cat.categoryName()))
-                .map(cat -> cat.categoryId())
-                .findFirst()
-                .orElse(1);
+        Map<String, Integer> categoryIdsByName = loadCategoryIdsByName();
 
         int personalGroupId = getGroupIdByName(mainUserId, "Personal Group");
         if (personalGroupId <= 0) {
@@ -169,13 +165,16 @@ public class DataSeeder {
         System.out.println("✓ Populating Personal Group expenses");
 
         // Add some personal expenses
-        createExpense(expensesService, personalGroupId, mainUserId, foodCategoryId, "Coffee Purchase",
+        createExpense(expensesService, personalGroupId, mainUserId,
+            getCategoryId(categoryIdsByName, "Food & Dining"), "Coffee Purchase",
                 new BigDecimal("150"), List.of(mainUserId), "Daily coffee from café");
 
-        createExpense(expensesService, personalGroupId, mainUserId, foodCategoryId, "Groceries",
+        createExpense(expensesService, personalGroupId, mainUserId,
+            getCategoryId(categoryIdsByName, "Groceries"), "Groceries",
                 new BigDecimal("2500"), List.of(mainUserId), "Weekly grocery shopping");
 
-        createExpense(expensesService, personalGroupId, mainUserId, foodCategoryId, "Internet Bill",
+        createExpense(expensesService, personalGroupId, mainUserId,
+            getCategoryId(categoryIdsByName, "Phone & Internet"), "Internet Bill",
                 new BigDecimal("1200"), List.of(mainUserId), "Monthly internet subscription");
     }
 
@@ -243,17 +242,12 @@ public class DataSeeder {
             return;
         }
 
-        JdbcCategoryRepository categoryRepo = new JdbcCategoryRepository();
-        int foodCategoryId = categoryRepo.findAll()
-                .stream()
-                .filter(cat -> "Food & Dining".equals(cat.categoryName()))
-                .map(cat -> cat.categoryId())
-                .findFirst()
-                .orElse(1); // Fallback to ID 1
+        Map<String, Integer> categoryIdsByName = loadCategoryIdsByName();
 
         if ("Roommate Expenses".equals(groupName)) {
             // Rent split
-            createExpense(expensesService, groupId, mainUserId, foodCategoryId, "Monthly Rent",
+            createExpense(expensesService, groupId, mainUserId,
+                getCategoryId(categoryIdsByName, "Rent & Housing"), "Monthly Rent",
                     new BigDecimal("5000"),
                     List.of(mainUserId, testMemberIds.get(0), 
                             testMemberIds.size() > 1 ? testMemberIds.get(1) : mainUserId,
@@ -262,7 +256,8 @@ public class DataSeeder {
 
             // Groceries - only if we have at least 2 test members
             if (testMemberIds.size() >= 2) {
-                createExpense(expensesService, groupId, testMemberIds.get(0), foodCategoryId, "Groceries",
+                createExpense(expensesService, groupId, testMemberIds.get(0),
+                    getCategoryId(categoryIdsByName, "Groceries"), "Groceries",
                         new BigDecimal("1200"),
                         List.of(mainUserId, testMemberIds.get(0), testMemberIds.get(1)),
                         "Weekly groceries from supermarket");
@@ -270,7 +265,8 @@ public class DataSeeder {
 
         } else if ("Weekend Trip".equals(groupName)) {
             // Accommodation
-            createExpense(expensesService, groupId, mainUserId, foodCategoryId, "Hotel Booking",
+                createExpense(expensesService, groupId, mainUserId,
+                    getCategoryId(categoryIdsByName, "Travel"), "Hotel Booking",
                     new BigDecimal("2400"),
                     List.of(mainUserId, testMemberIds.get(0), 
                             testMemberIds.size() > 1 ? testMemberIds.get(1) : mainUserId,
@@ -279,7 +275,8 @@ public class DataSeeder {
 
             // Activities - only if we have at least 2 test members
             if (testMemberIds.size() >= 2) {
-                createExpense(expensesService, groupId, testMemberIds.get(1), foodCategoryId,
+                createExpense(expensesService, groupId, testMemberIds.get(1),
+                    getCategoryId(categoryIdsByName, "Entertainment"),
                         "Adventure Activities",
                         new BigDecimal("900"),
                         List.of(mainUserId, testMemberIds.get(0), testMemberIds.get(1),
@@ -289,14 +286,16 @@ public class DataSeeder {
 
         } else if ("Office Meals".equals(groupName)) {
             // Lunch
-            createExpense(expensesService, groupId, mainUserId, foodCategoryId, "Team Lunch",
+            createExpense(expensesService, groupId, mainUserId,
+                getCategoryId(categoryIdsByName, "Food & Dining"), "Team Lunch",
                     new BigDecimal("900"),
                     List.of(mainUserId, testMemberIds.get(0), 
                             testMemberIds.size() > 1 ? testMemberIds.get(1) : mainUserId),
                     "Friday team lunch at Thai restaurant");
 
             // Snacks
-            createExpense(expensesService, groupId, testMemberIds.get(0), foodCategoryId,
+            createExpense(expensesService, groupId, testMemberIds.get(0),
+                getCategoryId(categoryIdsByName, "Food & Dining"),
                     "Coffee & Snacks",
                     new BigDecimal("350"),
                     List.of(mainUserId, testMemberIds.get(0), 
@@ -304,6 +303,25 @@ public class DataSeeder {
                             testMemberIds.size() > 2 ? testMemberIds.get(2) : mainUserId),
                     "Weekly team snacks");
         }
+    }
+
+    private static Map<String, Integer> loadCategoryIdsByName() {
+        JdbcCategoryRepository categoryRepo = new JdbcCategoryRepository();
+        Map<String, Integer> categoryIdsByName = new HashMap<>();
+
+        categoryRepo.findAll().forEach(category ->
+                categoryIdsByName.put(category.categoryName(), category.categoryId()));
+
+        return categoryIdsByName;
+    }
+
+    private static int getCategoryId(Map<String, Integer> categoryIdsByName, String categoryName) {
+        if (categoryIdsByName.containsKey(categoryName)) {
+            return categoryIdsByName.get(categoryName);
+        }
+
+        // Fallback to first known category ID, otherwise 1.
+        return categoryIdsByName.values().stream().findFirst().orElse(1);
     }
 
     /**

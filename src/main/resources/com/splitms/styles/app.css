@@ -536,6 +536,72 @@
     -fx-padding: 0;
 }
 
+.expenses-page-content {
+    -fx-padding: 0;
+}
+
+.expenses-title {
+    -fx-font-size: 46px;
+    -fx-font-weight: 800;
+    -fx-text-fill: #0d2947;
+}
+
+.expenses-subtitle {
+    -fx-font-size: 15px;
+    -fx-text-fill: #586b84;
+}
+
+.expenses-metrics-row {
+    -fx-alignment: center-left;
+}
+
+.expenses-metric-card {
+    -fx-background-color: #ffffff;
+    -fx-background-radius: 14;
+    -fx-border-color: #d2e2fa;
+    -fx-border-radius: 14;
+    -fx-padding: 14 16 14 16;
+}
+
+.expenses-metric-label {
+    -fx-font-size: 12px;
+    -fx-font-weight: 700;
+    -fx-text-fill: #5d789d;
+}
+
+.expenses-metric-value {
+    -fx-font-size: 28px;
+    -fx-font-weight: 800;
+    -fx-text-fill: #143b6f;
+}
+
+.expenses-charts-row {
+    -fx-alignment: center-left;
+}
+
+.expenses-chart-panel {
+    -fx-padding: 14;
+}
+
+.chart {
+    -fx-padding: 6;
+}
+
+.chart-legend {
+    -fx-background-color: transparent;
+}
+
+.chart-title {
+    -fx-text-fill: #163d6e;
+    -fx-font-size: 13px;
+    -fx-font-weight: 700;
+}
+
+.axis-label {
+    -fx-text-fill: #3f5e86;
+    -fx-font-size: 11px;
+}
+
 .group-details-stat-card {
     -fx-background-color: #ffffff;
     -fx-background-radius: 12;
