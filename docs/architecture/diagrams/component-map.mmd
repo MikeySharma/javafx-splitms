@@ -1,0 +1,63 @@
+classDiagram
+    class SplitmsApplication
+    class ViewNavigator
+    class MainShellController
+    class SessionManager
+    class ApplicationServices
+
+    class UserService
+    class GroupsService
+    class GroupMembersService
+    class ExpensesService
+    class CategoriesService
+    class TransactionsService
+
+    class UserRepository
+    class GroupRepository
+    class GroupMembershipRepository
+    class ExpenseRepository
+    class ExpenseSplitRepository
+    class CategoryRepository
+    class TransactionRepository
+
+    class Database
+    class MySQL
+
+    SplitmsApplication --> ViewNavigator
+    ViewNavigator --> MainShellController
+    ViewNavigator --> SessionManager
+    MainShellController --> SessionManager
+    MainShellController --> ApplicationServices
+
+    ApplicationServices --> UserService
+    ApplicationServices --> GroupsService
+    ApplicationServices --> GroupMembersService
+    ApplicationServices --> ExpensesService
+    ApplicationServices --> CategoriesService
+    ApplicationServices --> TransactionsService
+
+    UserService --> UserRepository
+    UserService --> GroupRepository
+    UserService --> GroupMembersService
+
+    GroupsService --> GroupRepository
+    GroupsService --> GroupMembersService
+
+    GroupMembersService --> GroupMembershipRepository
+    GroupMembersService --> UserRepository
+
+    ExpensesService --> ExpenseRepository
+    ExpensesService --> ExpenseSplitRepository
+
+    CategoriesService --> CategoryRepository
+    TransactionsService --> TransactionRepository
+
+    UserRepository --> Database
+    GroupRepository --> Database
+    GroupMembershipRepository --> Database
+    ExpenseRepository --> Database
+    ExpenseSplitRepository --> Database
+    CategoryRepository --> Database
+    TransactionRepository --> Database
+
+    Database --> MySQL

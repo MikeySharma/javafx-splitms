@@ -15,6 +15,26 @@ A split-expense desktop application built with JavaFX 25 and Maven. Users can re
 | Testing | JUnit 4.13.2 |
 | Build | Maven 3, Java 25 |
 
+## Architecture Docs and Diagrams
+
+Comprehensive architecture and system design documentation is available here:
+
+- [Architecture reference](docs/architecture/README.md)
+- [Diagram sources (Mermaid)](docs/architecture/diagrams)
+
+Included diagram set:
+
+- System context
+- Runtime layered architecture
+- Component map
+- Local deployment topology
+- Authentication sequence
+- Navigation state machine
+- Navigation loading sequence
+- Expense creation sequence
+- Settlement sequence
+- ERD (Flyway V1 to V9)
+
 ---
 
 ## Prerequisites
@@ -155,7 +175,7 @@ src/
       com/splitms/
         views/              # FXML layout files (9 files)
         styles/             # app.css
-      db/migration/         # Flyway SQL (V1–V7)
+      db/migration/         # Flyway SQL (V1-V9)
       META-INF/
         persistence.xml     # JPA/Hibernate configuration
   test/
@@ -166,6 +186,8 @@ src/
 ---
 
 ## Database schema
+
+For diagram view of the schema, see [ERD](docs/architecture/diagrams/data-erd.mmd).
 
 Managed by Flyway (`src/main/resources/db/migration`). Migrations must be applied in order before running the app or tests.
 

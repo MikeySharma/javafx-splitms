@@ -1,0 +1,26 @@
+stateDiagram-v2
+    [*] --> Index
+    Index --> Login: Click Login
+    Index --> Register: Click Register
+    Register --> Login: Register success
+
+    Login --> ShellDashboard: Login success
+    Login --> Login: Login failure
+
+    state Shell {
+        [*] --> Dashboard
+        Dashboard --> Groups: Sidebar click
+        Dashboard --> Profile: Sidebar click
+        Dashboard --> Expenses: Sidebar click
+        Groups --> GroupDetails: Open group
+        GroupDetails --> Groups: Back
+        Groups --> Dashboard: Sidebar click
+        Groups --> Profile: Sidebar click
+        Groups --> Expenses: Sidebar click
+        Profile --> Dashboard: Sidebar click
+        Expenses --> Dashboard: Sidebar click
+    }
+
+    ShellDashboard --> Shell
+    Shell --> Index: Logout
+    Shell --> Login: Session invalid

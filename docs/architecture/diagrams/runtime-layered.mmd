@@ -1,0 +1,56 @@
+flowchart TB
+    subgraph UI[Presentation Layer]
+        V1[FXML Views]
+        C1[Controllers]
+        VN[ViewNavigator]
+        SH[MainShellController]
+    end
+
+    subgraph APP[Application Layer]
+        SS[SessionManager]
+        AS[ApplicationServices]
+        US[UserService]
+        GS[GroupsService]
+        GMS[GroupMembersService]
+        ES[ExpensesService]
+        CS[CategoriesService]
+        TS[TransactionsService]
+    end
+
+    subgraph DATA[Data Access Layer]
+        RI[Repository Interfaces]
+        RJ[Jdbc Repositories]
+        DBX[Database.java]
+        JPA[Jpa.java]
+    end
+
+    subgraph STORE[Persistence]
+        MYSQL[(MySQL)]
+        MIG[Flyway Migrations]
+    end
+
+    V1 --> C1
+    C1 --> VN
+    C1 --> SH
+    C1 --> SS
+    C1 --> AS
+
+    AS --> US
+    AS --> GS
+    AS --> GMS
+    AS --> ES
+    AS --> CS
+    AS --> TS
+
+    US --> RI
+    GS --> RI
+    GMS --> RI
+    ES --> RI
+    CS --> RI
+    TS --> RI
+
+    RI --> RJ
+    RJ --> DBX
+    DBX --> MYSQL
+    JPA --> MYSQL
+    MIG --> MYSQL

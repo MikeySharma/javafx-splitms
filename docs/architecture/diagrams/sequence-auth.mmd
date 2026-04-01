@@ -1,0 +1,36 @@
+sequenceDiagram
+    actor U as User
+    participant RC as RegisterController
+    participant US as UserService
+    participant UR as UserRepository
+    participant GR as GroupRepository
+    participant GM as GroupMembersService
+
+    U->>RC: Submit name, email, password
+    RC->>US: register(name, email, password)
+    US->>UR: findByEmail(normalizedEmail)
+    UR-->>US: not found
+    US->>UR: create(user)
+    UR-->>US: userId
+    US->>GR: create personal default group
+    GR-->>US: groupId
+    US->>GM: addMember(groupId, userId)
+    US-->>RC: ServiceResult success
+    RC-->>U: Show success, navigate to Login
+
+    participant LC as LoginController
+    participant SM as SessionManager
+
+    U->>LC: Submit email, password
+    LC->>US: login(email, password)
+    US->>UR: findAuthByEmail(normalizedEmail)
+    UR-->>US: UserAuthRecord
+    US-->>LC: ServiceResult success + UserAccount
+    LC->>SM: login(userId, name, email)
+    LC-->>U: Navigate to Dashboard
+
+    participant MSC as MainShellController
+
+    U->>MSC: Click Logout
+    MSC->>SM: logout()
+    MSC-->>U: Navigate to Index
