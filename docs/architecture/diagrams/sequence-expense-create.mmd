@@ -1,0 +1,23 @@
+sequenceDiagram
+    actor U as User
+    participant EC as ExpensesContentController
+    participant ES as ExpensesService
+    participant ER as JdbcExpenseRepository
+    participant SR as JdbcExpenseSplitRepository
+    participant DB as MySQL
+
+    U->>EC: Submit expense with member splits
+    EC->>ES: createExpenseWithSplits(request)
+    ES->>ES: validate amount and split totals
+    alt valid splits
+        ES->>ER: create expense row
+        ER->>DB: INSERT expenses
+        DB-->>ER: expenseId
+        ES->>SR: create split rows
+        SR->>DB: INSERT expense_splits batch
+        ES-->>EC: ServiceResult success
+        EC-->>U: Refresh list and balances
+    else invalid splits
+        ES-->>EC: ServiceResult fail
+        EC-->>U: Show validation error
+    end

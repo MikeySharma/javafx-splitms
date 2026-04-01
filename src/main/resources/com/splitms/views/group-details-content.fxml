@@ -3,7 +3,6 @@
 <?import javafx.geometry.Insets?>
 <?import javafx.scene.control.Button?>
 <?import javafx.scene.control.Label?>
-<?import javafx.scene.control.ListView?>
 <?import javafx.scene.control.ScrollPane?>
 <?import javafx.scene.layout.HBox?>
 <?import javafx.scene.layout.Priority?>
@@ -33,30 +32,46 @@
 
     <Label fx:id="statusLabel" styleClass="status-label" text="" />
 
-    <!-- Action Buttons -->
-    <HBox alignment="CENTER_LEFT" spacing="8.0">
-        <Button fx:id="addMemberButton" onAction="#onAddMember" styleClass="primary-button" text="Add Member" />
-        <Button onAction="#onAddExpense" styleClass="primary-button" text="Add Expense" />
-        <Button fx:id="removeMemberButton" onAction="#onRemoveMembers" styleClass="outline-button" text="Remove Member" />
-        <Button fx:id="addSettlementButton" onAction="#onAddSettlement" styleClass="outline-button" text="Add Settlement" />
-        <Region HBox.hgrow="ALWAYS" />
-    </HBox>
-
     <!-- Members Section -->
     <VBox spacing="8.0" style="-fx-border-color: #d2e2fa; -fx-border-radius: 8; -fx-padding: 12;">
-        <Label styleClass="form-label" text="Group Members" />
-        <ListView fx:id="membersListView" prefHeight="150" />
+        <HBox alignment="CENTER_LEFT" spacing="10.0">
+            <Label styleClass="form-label" text="Group Members" />
+            <Region HBox.hgrow="ALWAYS" />
+            <Button fx:id="addMemberButton" onAction="#onAddMember" styleClass="primary-button" text="+ Add Member" />
+            <Button fx:id="removeMemberButton" onAction="#onRemoveMembers" styleClass="outline-button" text="Remove Member" />
+        </HBox>
+        <ScrollPane fitToWidth="true" prefHeight="150" styleClass="dashboard-scroll">
+            <content>
+                <VBox fx:id="membersContainer" spacing="10" styleClass="recent-list" />
+            </content>
+        </ScrollPane>
     </VBox>
 
     <!-- Expenses Section -->
     <VBox spacing="8.0" style="-fx-border-color: #d2e2fa; -fx-border-radius: 8; -fx-padding: 12;" VBox.vgrow="ALWAYS">
-        <Label styleClass="form-label" text="Recent Expenses" />
-        <ListView fx:id="expensesListView" prefHeight="150" VBox.vgrow="ALWAYS" />
+        <HBox alignment="CENTER_LEFT" spacing="10.0">
+            <Label styleClass="form-label" text="Recent Expenses" />
+            <Region HBox.hgrow="ALWAYS" />
+            <Button onAction="#onAddExpense" styleClass="primary-button" text="+ Add Expense" />
+        </HBox>
+        <ScrollPane fitToWidth="true" prefHeight="220" styleClass="dashboard-scroll" VBox.vgrow="ALWAYS">
+            <content>
+                <VBox fx:id="expensesContainer" spacing="10" styleClass="recent-list" />
+            </content>
+        </ScrollPane>
     </VBox>
 
     <!-- Settlements Section -->
     <VBox spacing="8.0" style="-fx-border-color: #d2e2fa; -fx-border-radius: 8; -fx-padding: 12;">
-        <Label styleClass="form-label" text="Settlements" />
-        <ListView fx:id="settlementsListView" prefHeight="150" />
+        <HBox alignment="CENTER_LEFT" spacing="10.0">
+            <Label styleClass="form-label" text="Settlements" />
+            <Region HBox.hgrow="ALWAYS" />
+            <Button fx:id="addSettlementButton" onAction="#onAddSettlement" styleClass="outline-button" text="+ Add Settlement" />
+        </HBox>
+        <ScrollPane fitToWidth="true" prefHeight="170" styleClass="dashboard-scroll">
+            <content>
+                <VBox fx:id="settlementsContainer" spacing="10" styleClass="recent-list" />
+            </content>
+        </ScrollPane>
     </VBox>
 </VBox>

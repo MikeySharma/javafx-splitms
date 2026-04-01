@@ -36,12 +36,14 @@ import javafx.scene.control.ComboBox;
 import javafx.scene.control.DatePicker;
 import javafx.scene.control.Dialog;
 import javafx.scene.control.Label;
-import javafx.scene.control.ListView;
 import javafx.scene.control.RadioButton;
 import javafx.scene.control.ScrollPane;
 import javafx.scene.control.TextField;
 import javafx.scene.control.ToggleGroup;
 import javafx.scene.layout.GridPane;
+import javafx.scene.layout.HBox;
+import javafx.scene.layout.Priority;
+import javafx.scene.layout.Region;
 import javafx.scene.layout.VBox;
 
 public class GroupDetailsContentController {
@@ -57,10 +59,7 @@ public class GroupDetailsContentController {
     // ============ State ============
     private GroupModel group;
     private Runnable onBackRequest;
-    private ObservableList<String> membersData = FXCollections.observableArrayList();
-    private ObservableList<String> expensesData = FXCollections.observableArrayList();
-    private ObservableList<String> settlementsData = FXCollections.observableArrayList();
-    
+
     // ============ Cached Data for Dialogs ============
     private List<GroupMemberView> currentMembers = new ArrayList<>();
     private Map<Integer, GroupMemberView> membersByUserId = new HashMap<>();
@@ -77,13 +76,13 @@ public class GroupDetailsContentController {
     private Label statusLabel;
 
     @FXML
-    private ListView<String> membersListView;
+    private VBox membersContainer;
 
     @FXML
-    private ListView<String> expensesListView;
+    private VBox expensesContainer;
 
     @FXML
-    private ListView<String> settlementsListView;
+    private VBox settlementsContainer;
 
     @FXML
     private Button addMemberButton;
@@ -106,11 +105,6 @@ public class GroupDetailsContentController {
 
         titleLabel.setText(group.groupName());
         subtitleLabel.setText(group.description());
-        
-        // Initialize lists
-        membersListView.setItems(membersData);
-        expensesListView.setItems(expensesData);
-        settlementsListView.setItems(settlementsData);
         
         // Hide member and settlement buttons for personal default groups
         boolean isPersonalGroup = group.personalDefault();
@@ -997,14 +991,16 @@ public class GroupDetailsContentController {
      */
     private void loadGroupMembers() {
         if (group == null) return;
-        
+
         ServiceResult<List<GroupMemberView>> result = groupMembersService.listMembers(group.groupId());
-        membersData.clear();
-        
-        if (result.success() && result.data() != null) {
+        membersContainer.getChildren().clear();
+
+        if (result.success() && result.data() != null && !result.data().isEmpty()) {
             for (GroupMemberView member : result.data()) {
-                membersData.add(member.name() + " (" + member.email() + ")");
+                membersContainer.getChildren().add(createMemberRow(member));
             }
+        } else {
+            membersContainer.getChildren().add(createEmptyStateLabel("No members in this group yet."));
         }
     }
 
@@ -1014,24 +1010,33 @@ public class GroupDetailsContentController {
      */
     private void loadGroupExpenses() {
         if (group == null) return;
-        
-        expensesData.clear();
-        
+
+        expensesContainer.getChildren().clear();
+
         ServiceResult<List<ExpenseModel>> result = expensesService.listExpensesForGroup(group.groupId());
-        if (result.success() && result.data() != null) {
+        if (result.success() && result.data() != null && !result.data().isEmpty()) {
+            int userId = sessionManager.getUserId();
             for (ExpenseModel expense : result.data()) {
-                String payerName = membersByUserId.containsKey(expense.payerId()) 
-                    ? membersByUserId.get(expense.payerId()).name()
-                    : "Unknown";
-                
-                String displayText = String.format("%s - $%s (paid by %s) - %s",
-                    expense.title(),
-                    expense.amount(),
-                    payerName,
-                    expense.expenseDate()
-                );
-                expensesData.add(displayText);
+                String payerName = membersByUserId.containsKey(expense.payerId())
+                        ? membersByUserId.get(expense.payerId()).name()
+                        : "Unknown";
+
+                BigDecimal myShare = null;
+                ServiceResult<List<ExpenseSplitModel>> splitResult =
+                        expensesService.listExpenseSplitsForExpense(expense.expenseId());
+                if (splitResult.success() && splitResult.data() != null) {
+                    for (ExpenseSplitModel split : splitResult.data()) {
+                        if (split.userId() == userId) {
+                            myShare = split.shareAmount();
+                            break;
+                        }
+                    }
+                }
+
+                expensesContainer.getChildren().add(createExpenseRow(expense, payerName, myShare));
             }
+        } else {
+            expensesContainer.getChildren().add(createEmptyStateLabel("No expenses recorded yet."));
         }
     }
 
@@ -1041,28 +1046,25 @@ public class GroupDetailsContentController {
      */
     private void loadGroupSettlements() {
         if (group == null) return;
-        
-        settlementsData.clear();
-        
+
+        settlementsContainer.getChildren().clear();
+
         ServiceResult<List<TransactionModel>> result = transactionsService.listTransactionsForGroup(group.groupId());
-        if (result.success() && result.data() != null) {
+        if (result.success() && result.data() != null && !result.data().isEmpty()) {
             for (TransactionModel transaction : result.data()) {
                 String fromName = membersByUserId.containsKey(transaction.fromUserId())
-                    ? membersByUserId.get(transaction.fromUserId()).name()
-                    : "Unknown";
-                
+                        ? membersByUserId.get(transaction.fromUserId()).name()
+                        : "Unknown";
+
                 String toName = membersByUserId.containsKey(transaction.toUserId())
-                    ? membersByUserId.get(transaction.toUserId()).name()
-                    : "Unknown";
-                
-                String displayText = String.format("%s → %s: $%s - %s",
-                    fromName,
-                    toName,
-                    transaction.amount(),
-                    transaction.transactionDate()
-                );
-                settlementsData.add(displayText);
+                        ? membersByUserId.get(transaction.toUserId()).name()
+                        : "Unknown";
+
+                settlementsContainer.getChildren().add(createSettlementRow(fromName, toName, transaction.amount(),
+                        transaction.transactionDate().toString()));
             }
+        } else {
+            settlementsContainer.getChildren().add(createEmptyStateLabel("No settlements recorded yet."));
         }
     }
 
@@ -1099,6 +1101,76 @@ public class GroupDetailsContentController {
         });
 
         return dialog.showAndWait();
+    }
+
+    private VBox createMemberRow(GroupMemberView member) {
+        VBox row = new VBox(4);
+        row.getStyleClass().add("recent-row");
+
+        Label nameLabel = new Label(member.name());
+        nameLabel.getStyleClass().add("recent-row-title");
+
+        Label emailLabel = new Label(member.email());
+        emailLabel.getStyleClass().add("recent-row-subtitle");
+
+        row.getChildren().addAll(nameLabel, emailLabel);
+        return row;
+    }
+
+    private VBox createExpenseRow(ExpenseModel expense, String payerName, BigDecimal myShare) {
+        VBox row = new VBox(4);
+        row.getStyleClass().add("recent-row");
+
+        HBox topLine = new HBox(8);
+        Label titleLabel = new Label(expense.title());
+        titleLabel.getStyleClass().add("recent-row-title");
+
+        Label amountLabel = new Label(String.format("NPR %.2f", expense.amount()));
+        amountLabel.getStyleClass().add("recent-row-amount");
+
+        Region spacer = new Region();
+        HBox.setHgrow(spacer, Priority.ALWAYS);
+        topLine.getChildren().addAll(titleLabel, spacer, amountLabel);
+
+        Label subtitleLabel = new Label("Paid by " + payerName + " on " + expense.expenseDate());
+        subtitleLabel.getStyleClass().add("recent-row-subtitle");
+
+        String shareText = myShare == null
+                ? "Your share: Not participating"
+                : String.format("Your share: NPR %.2f", myShare);
+        Label shareLabel = new Label(shareText);
+        shareLabel.getStyleClass().add(myShare == null ? "recent-row-share-muted" : "recent-row-share");
+
+        row.getChildren().addAll(topLine, subtitleLabel, shareLabel);
+        return row;
+    }
+
+    private VBox createSettlementRow(String fromName, String toName, BigDecimal amount, String date) {
+        VBox row = new VBox(4);
+        row.getStyleClass().add("recent-row");
+
+        HBox topLine = new HBox(8);
+        Label titleLabel = new Label(fromName + " → " + toName);
+        titleLabel.getStyleClass().add("recent-row-title");
+
+        Label amountLabel = new Label(String.format("NPR %.2f", amount));
+        amountLabel.getStyleClass().add("recent-row-amount");
+
+        Region spacer = new Region();
+        HBox.setHgrow(spacer, Priority.ALWAYS);
+        topLine.getChildren().addAll(titleLabel, spacer, amountLabel);
+
+        Label subtitleLabel = new Label("Settlement date: " + date);
+        subtitleLabel.getStyleClass().add("recent-row-subtitle");
+
+        row.getChildren().addAll(topLine, subtitleLabel);
+        return row;
+    }
+
+    private Label createEmptyStateLabel(String text) {
+        Label label = new Label(text);
+        label.getStyleClass().add("recent-list-empty");
+        return label;
     }
 
     private void showError(String message) {

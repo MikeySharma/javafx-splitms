@@ -1,0 +1,26 @@
+sequenceDiagram
+    actor U as User
+    participant VN as ViewNavigator
+    participant SM as SessionManager
+    participant MS as MainShellController
+    participant FX as FXMLLoader
+
+    U->>VN: showDashboard()
+    VN->>SM: isLoggedIn()
+    alt logged in
+        VN->>VN: ensureShellLoaded()
+        VN->>FX: load main-shell.fxml
+        FX-->>VN: MainShellController
+        VN->>MS: setNavigator(this)
+        VN->>MS: showDashboardContent()
+        MS->>FX: load dashboard-content.fxml
+    else not logged in
+        VN->>FX: load login.fxml
+    end
+
+    U->>MS: open Groups
+    MS->>FX: load groups-content.fxml
+    U->>MS: open Group Details
+    MS->>FX: load group-details-content.fxml
+    U->>MS: back to Groups
+    MS->>FX: load groups-content.fxml

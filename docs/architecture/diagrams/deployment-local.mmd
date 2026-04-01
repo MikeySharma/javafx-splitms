@@ -1,0 +1,16 @@
+flowchart LR
+    subgraph DEV[Developer Machine]
+        CLI[Maven CLI]
+        APP[JVM Process\nSplitMS JavaFX App]
+        ENV[Shell and .env]
+    end
+
+    subgraph DOCKER[Docker]
+        DBCONT[MySQL Container]
+    end
+
+    CLI -->|mvn flyway:migrate| DBCONT
+    CLI -->|mvn exec:java DataSeeder| DBCONT
+    CLI -->|mvn clean javafx:run| APP
+    ENV -->|DB config| APP
+    APP -->|JDBC| DBCONT

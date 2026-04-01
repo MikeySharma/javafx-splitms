@@ -1,0 +1,15 @@
+flowchart LR
+    User[User]
+    App[SplitMS Desktop App\nJavaFX + Maven]
+    DB[(MySQL Database)]
+    Env[Environment Variables\nDB_HOST DB_PORT DB_NAME DB_USER DB_PASSWORD]
+    Flyway[Flyway Migrations\nV1..V9]
+    Seeder[DataSeeder Utility]
+    Docker[Docker Compose\nmysql-splitms]
+
+    User -->|uses| App
+    App -->|read/write via JDBC| DB
+    Env -->|configuration| App
+    Flyway -->|applies schema| DB
+    Seeder -->|inserts sample data| DB
+    Docker -->|runs local database| DB

@@ -1,0 +1,75 @@
+erDiagram
+    USERS {
+        INT id PK
+        VARCHAR name
+        VARCHAR email UK
+        VARCHAR password_hash
+        TIMESTAMP created_at
+    }
+
+    GROUP_TABLE {
+        INT group_id PK
+        INT user_id FK
+        VARCHAR group_name
+        VARCHAR description
+        BOOLEAN is_personal_default
+        TIMESTAMP created_at
+    }
+
+    GROUP_MEMBERS {
+        INT id PK
+        INT group_id FK
+        INT user_id FK
+        TIMESTAMP added_at
+    }
+
+    CATEGORIES {
+        INT category_id PK
+        VARCHAR category_name
+        VARCHAR category_type
+        VARCHAR icon
+    }
+
+    EXPENSES {
+        INT expense_id PK
+        INT group_id FK
+        INT payer_id FK
+        INT category_id FK
+        DECIMAL amount
+        DATE expense_date
+        VARCHAR description
+        VARCHAR title
+    }
+
+    EXPENSE_SPLITS {
+        INT split_id PK
+        INT expense_id FK
+        INT user_id FK
+        DECIMAL share_amount
+        FLOAT share_percentage
+    }
+
+    TRANSACTIONS {
+        INT transaction_id PK
+        INT group_id FK
+        INT from_user_id FK
+        INT to_user_id FK
+        DECIMAL amount
+        DATE transaction_date
+        BOOLEAN settled
+    }
+
+    USERS ||--o{ GROUP_TABLE : owns
+    USERS ||--o{ GROUP_MEMBERS : joins
+    GROUP_TABLE ||--o{ GROUP_MEMBERS : has
+
+    GROUP_TABLE ||--o{ EXPENSES : includes
+    USERS ||--o{ EXPENSES : pays
+    CATEGORIES ||--o{ EXPENSES : classifies
+
+    EXPENSES ||--o{ EXPENSE_SPLITS : splits_into
+    USERS ||--o{ EXPENSE_SPLITS : owes_share
+
+    GROUP_TABLE ||--o{ TRANSACTIONS : records
+    USERS ||--o{ TRANSACTIONS : from_user
+    USERS ||--o{ TRANSACTIONS : to_user

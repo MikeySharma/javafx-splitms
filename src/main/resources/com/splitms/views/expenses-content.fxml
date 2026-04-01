@@ -1,0 +1,91 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.geometry.Insets?>
+<?import javafx.scene.chart.BarChart?>
+<?import javafx.scene.chart.CategoryAxis?>
+<?import javafx.scene.chart.NumberAxis?>
+<?import javafx.scene.chart.PieChart?>
+<?import javafx.scene.control.Label?>
+<?import javafx.scene.control.ScrollPane?>
+<?import javafx.scene.layout.HBox?>
+<?import javafx.scene.layout.Priority?>
+<?import javafx.scene.layout.Region?>
+<?import javafx.scene.layout.VBox?>
+
+<ScrollPane xmlns="http://javafx.com/javafx/25"
+            xmlns:fx="http://javafx.com/fxml/1"
+            fx:controller="com.splitms.controllers.ExpensesContentController"
+            fitToWidth="true"
+            hbarPolicy="NEVER"
+            styleClass="dashboard-scroll">
+    <content>
+        <VBox spacing="18.0" styleClass="dashboard-content expenses-page-content">
+            <padding>
+                <Insets top="24.0" right="20.0" bottom="24.0" left="18.0" />
+            </padding>
+
+            <VBox spacing="4.0">
+                <Label styleClass="expenses-title" text="Expenses" />
+                <Label styleClass="expenses-subtitle" text="Track totals, spending trends, and your latest expenses." />
+            </VBox>
+
+            <HBox spacing="12.0" styleClass="expenses-metrics-row">
+                <VBox spacing="6.0" styleClass="expenses-metric-card" HBox.hgrow="ALWAYS">
+                    <Label styleClass="expenses-metric-label" text="Total Expenses So Far" />
+                    <Label fx:id="totalExpensesValueLabel" styleClass="expenses-metric-value" text="NPR 0.00" />
+                </VBox>
+
+                <VBox spacing="6.0" styleClass="expenses-metric-card" HBox.hgrow="ALWAYS">
+                    <Label styleClass="expenses-metric-label" text="Your Share So Far" />
+                    <Label fx:id="yourShareValueLabel" styleClass="expenses-metric-value" text="NPR 0.00" />
+                </VBox>
+
+                <VBox spacing="6.0" styleClass="expenses-metric-card" HBox.hgrow="ALWAYS">
+                    <Label styleClass="expenses-metric-label" text="This Month" />
+                    <Label fx:id="thisMonthValueLabel" styleClass="expenses-metric-value" text="NPR 0.00" />
+                </VBox>
+
+                <VBox spacing="6.0" styleClass="expenses-metric-card" HBox.hgrow="ALWAYS">
+                    <Label styleClass="expenses-metric-label" text="Total Expense Count" />
+                    <Label fx:id="expenseCountValueLabel" styleClass="expenses-metric-value" text="0" />
+                </VBox>
+            </HBox>
+
+            <HBox spacing="12.0" styleClass="expenses-charts-row">
+                <VBox spacing="10.0" styleClass="dashboard-panel expenses-chart-panel" HBox.hgrow="ALWAYS">
+                    <HBox alignment="CENTER_LEFT" spacing="8.0">
+                        <Label styleClass="dashboard-panel-title" text="By Category" />
+                        <Region HBox.hgrow="ALWAYS" />
+                        <Label fx:id="categoryChartSummaryLabel" styleClass="dashboard-meta" text="" />
+                    </HBox>
+                    <PieChart fx:id="categoryPieChart" legendVisible="true" labelsVisible="true" prefHeight="290.0" />
+                </VBox>
+
+                <VBox spacing="10.0" styleClass="dashboard-panel expenses-chart-panel" HBox.hgrow="ALWAYS">
+                    <HBox alignment="CENTER_LEFT" spacing="8.0">
+                        <Label styleClass="dashboard-panel-title" text="By Group" />
+                        <Region HBox.hgrow="ALWAYS" />
+                        <Label fx:id="groupChartSummaryLabel" styleClass="dashboard-meta" text="" />
+                    </HBox>
+                    <BarChart fx:id="groupBarChart" categoryGap="16.0" barGap="4.0" prefHeight="290.0" legendVisible="false">
+                        <xAxis>
+                            <CategoryAxis label="Group" />
+                        </xAxis>
+                        <yAxis>
+                            <NumberAxis label="Amount (NPR)" />
+                        </yAxis>
+                    </BarChart>
+                </VBox>
+            </HBox>
+
+            <VBox spacing="10.0" styleClass="dashboard-panel">
+                <HBox alignment="CENTER_LEFT" spacing="8.0">
+                    <Label styleClass="dashboard-panel-title" text="Recent Expenses" />
+                    <Region HBox.hgrow="ALWAYS" />
+                    <Label fx:id="recentSummaryLabel" styleClass="dashboard-meta" text="" />
+                </HBox>
+                <VBox fx:id="recentExpensesContainer" spacing="8.0" styleClass="recent-list" VBox.vgrow="ALWAYS" />
+            </VBox>
+        </VBox>
+    </content>
+</ScrollPane>

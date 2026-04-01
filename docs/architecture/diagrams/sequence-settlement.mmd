@@ -1,0 +1,20 @@
+sequenceDiagram
+    actor U as User
+    participant GC as GroupDetailsContentController
+    participant TS as TransactionsService
+    participant TR as JdbcTransactionRepository
+    participant DB as MySQL
+
+    U->>GC: Settle amount from debtor to creditor
+    GC->>TS: createTransaction(groupId, fromUser, toUser, amount)
+    TS->>TR: create transaction with settled=false
+    TR->>DB: INSERT transactions
+    DB-->>TR: transactionId
+    TS-->>GC: ServiceResult success
+
+    U->>GC: Mark transaction settled
+    GC->>TS: settleTransaction(transactionId)
+    TS->>TR: settle(transactionId)
+    TR->>DB: UPDATE transactions SET settled=true
+    TS-->>GC: ServiceResult success
+    GC-->>U: Updated balances and settlement status

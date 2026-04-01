@@ -15,6 +15,26 @@ A split-expense desktop application built with JavaFX 25 and Maven. Users can re
 | Testing | JUnit 4.13.2 |
 | Build | Maven 3, Java 25 |
 
+## Architecture Docs and Diagrams
+
+Comprehensive architecture and system design documentation is available here:
+
+- [Architecture reference](docs/architecture/README.md)
+- [Diagram sources (Mermaid)](docs/architecture/diagrams)
+
+Included diagram set:
+
+- System context
+- Runtime layered architecture
+- Component map
+- Local deployment topology
+- Authentication sequence
+- Navigation state machine
+- Navigation loading sequence
+- Expense creation sequence
+- Settlement sequence
+- ERD (Flyway V1 to V9)
+
 ---
 
 ## Prerequisites
@@ -58,7 +78,22 @@ DB_PASSWORD=<your_password>
 mvn flyway:migrate
 ```
 
-**4. Run the app:**
+**4. (Optional) Seed test data:**
+
+Populate the database with sample users, groups, and expenses for quick feature testing:
+
+```bash
+mvn exec:java -Dexec.mainClass="com.splitms.utils.DataSeeder"
+```
+
+This creates:
+- **Main account:** `mikey@mikey.com` (password: `mikey`)
+- **Test members:** `alice@test.com`, `bob@test.com`, `charlie@test.com` (password: `password123`)
+- **3 sample groups** with 7+ expenses and splits so you can immediately test features without manual data entry
+
+> **Note:** The seeder automatically cleans up previous test data on re-run, so it's safe to use multiple times.
+
+**5. Run the app:**
 ```bash
 mvn clean javafx:run
 ```
@@ -140,7 +175,7 @@ src/
       com/splitms/
         views/              # FXML layout files (9 files)
         styles/             # app.css
-      db/migration/         # Flyway SQL (V1–V7)
+      db/migration/         # Flyway SQL (V1-V9)
       META-INF/
         persistence.xml     # JPA/Hibernate configuration
   test/
@@ -151,6 +186,8 @@ src/
 ---
 
 ## Database schema
+
+For diagram view of the schema, see [ERD](docs/architecture/diagrams/data-erd.mmd).
 
 Managed by Flyway (`src/main/resources/db/migration`). Migrations must be applied in order before running the app or tests.
 
