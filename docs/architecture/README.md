@@ -77,7 +77,6 @@ flowchart TB
 		RI[Repository Interfaces]
 		RJ[Jdbc Repositories]
 		DBX[Database.java]
-		JPA[Jpa.java]
 	end
 
 	subgraph STORE[Persistence]
@@ -108,7 +107,6 @@ flowchart TB
 	RI --> RJ
 	RJ --> DBX
 	DBX --> MYSQL
-	JPA --> MYSQL
 	MIG --> MYSQL
 ```
 
