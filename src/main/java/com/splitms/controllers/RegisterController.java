@@ -1,6 +1,6 @@
 package com.splitms.controllers;
 
-import com.splitms.pages.ViewNavigator;
+import com.splitms.ViewNavigator;
 import com.splitms.models.UserAccount;
 import com.splitms.services.ApplicationServices;
 import com.splitms.services.ServiceResult;

@@ -1,10 +1,10 @@
 package com.splitms.controllers;
 
-import com.splitms.pages.ViewNavigator;
 import com.splitms.services.ApplicationServices;
 import com.splitms.services.ServiceResult;
 import com.splitms.services.SessionManager;
 import com.splitms.services.UserService;
+import com.splitms.ViewNavigator;
 import com.splitms.models.UserAccount;
 import com.splitms.utils.Normalize;
 import com.splitms.utils.Validation;

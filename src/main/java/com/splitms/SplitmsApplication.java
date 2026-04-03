@@ -1,4 +1,4 @@
-package com.splitms.pages;
+package com.splitms;
 
 import com.splitms.utils.SystemInfo;
 import com.splitms.lib.Database;

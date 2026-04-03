@@ -1,7 +1,7 @@
 package com.splitms.controllers;
 
+import com.splitms.ViewNavigator;
 import com.splitms.models.GroupModel;
-import com.splitms.pages.ViewNavigator;
 import com.splitms.services.SessionManager;
 import java.io.IOException;
 import java.util.function.Consumer;
