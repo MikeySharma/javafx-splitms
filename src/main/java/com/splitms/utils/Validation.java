@@ -6,8 +6,4 @@ public class Validation {
         return email.contains("@") && email.contains(".") && email.indexOf('@') < email.lastIndexOf('.');
     }
 
-    public static String escapeSql(String value) {
-        return value == null ? "" : value.replace("'", "''");
-    }
-
 }
