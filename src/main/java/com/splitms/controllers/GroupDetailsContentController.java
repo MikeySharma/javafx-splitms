@@ -357,9 +357,9 @@ public class GroupDetailsContentController {
         
         // Add checkboxes for each member
         for (GroupMemberView member : currentMembers) {
-            // Exclude group owner from removal
-            if (member.userId() == group.groupId()) {
-                continue; // Skip owner
+            // Exclude current logged-in user and group owner from removal
+            if (member.userId() == sessionManager.getUserId() || member.userId() == group.ownerUserId()) {
+                continue; // Skip current user and owner
             }
             
             CheckBox checkBox = new CheckBox(member.name() + " (" + member.email() + ")");
