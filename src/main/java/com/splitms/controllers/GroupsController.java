@@ -1,6 +1,6 @@
 package com.splitms.controllers;
 
-import com.splitms.pages.ViewNavigator;
+import com.splitms.ViewNavigator;
 import com.splitms.services.SessionManager;
 import javafx.fxml.FXML;
 import javafx.scene.control.Label;

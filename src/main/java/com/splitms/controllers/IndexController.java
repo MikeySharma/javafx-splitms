@@ -1,6 +1,7 @@
 package com.splitms.controllers;
 
-import com.splitms.pages.ViewNavigator;
+import com.splitms.ViewNavigator;
+
 import javafx.fxml.FXML;
 
 public class IndexController implements NavigatorAware {

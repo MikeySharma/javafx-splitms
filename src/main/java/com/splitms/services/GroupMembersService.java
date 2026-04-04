@@ -87,15 +87,7 @@ public class GroupMembersService implements GroupMembershipService {
 
         return membershipRepository.addMember(groupId, userId);
     }
-
-    public boolean removeMemberRaw(int groupId, int userId) {
-        if (groupId <= 0 || userId <= 0) {
-            return false;
-        }
-
-        return membershipRepository.removeMember(groupId, userId);
-    }
-
+    
     public boolean isMember(int groupId, int userId) {
         if (groupId <= 0 || userId <= 0) {
             return false;

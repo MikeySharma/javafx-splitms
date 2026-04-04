@@ -7,7 +7,6 @@ A split-expense desktop application built with JavaFX 25 and Maven. Users can re
 | Layer | Technology |
 |-------|------------|
 | UI | JavaFX 25 + FXML |
-| ORM | Hibernate 6.4.4 / Jakarta Persistence 3.1 |
 | Data access | Pure JDBC (repository layer) |
 | Database | MySQL 8+ (mysql-connector-j 9.4.0) |
 | Migrations | Flyway 12.1.0 |
@@ -131,27 +130,27 @@ mvn test
 The app follows a layered architecture with strict separation of concerns:
 
 ```
-┌─────────────────────────────────────────────────┐
-│  Pages  (SplitmsApplication, ViewNavigator)      │  Entry point, scene/stage management
-├─────────────────────────────────────────────────┤
-│  Controllers  (JavaFX / FXML)                    │  UI event handlers, view state
-├─────────────────────────────────────────────────┤
-│  Services                                        │  Business logic, validation
-│    └── returns ServiceResult<T>                  │  Typed success/failure wrapper
-├─────────────────────────────────────────────────┤
-│  Repositories  (interfaces + JDBC impls)         │  SQL queries, entity mapping
-├─────────────────────────────────────────────────┤
-│  Database  (JDBC connection singleton)           │  Connection pool, executeQuery/Update
-├─────────────────────────────────────────────────┤
-│  MySQL                                           │  Persistent storage
-└─────────────────────────────────────────────────┘
+┌──────────────────────────────────────────────────┐
+│  Entry Point  (SplitmsApplication, ViewNavigator) │  Stage/scene management, navigation
+├──────────────────────────────────────────────────┤
+│  Controllers  (JavaFX / FXML)                     │  UI event handlers, view state
+├──────────────────────────────────────────────────┤
+│  Services                                         │  Business logic, validation
+│    └── returns ServiceResult<T>                   │  Typed success/failure wrapper
+├──────────────────────────────────────────────────┤
+│  Repositories  (interfaces + JDBC impls)          │  SQL queries, entity mapping
+├──────────────────────────────────────────────────┤
+│  Database  (JDBC connection pool)                 │  Connection management, executeQuery/Update
+├──────────────────────────────────────────────────┤
+│  MySQL                                            │  Persistent storage (Flyway-managed)
+└──────────────────────────────────────────────────┘
 ```
 
 **Cross-cutting concerns:**
 - `SessionManager` — singleton that holds the currently logged-in user's `userId`, `name`, and `email` in memory for the duration of the app session.
 - `ServiceResult<T>` — a Java record `(boolean success, String message, T data)` returned by every service method. Controllers check `.success()` before reading `.data()`.
 - `ApplicationServices` — a static service-locator class that wires repositories into services and exposes `userService()`, `groupsService()`, and `groupMembersService()`.
-- `JPA/Hibernate` is used via `Jpa.java` for `EntityManagerFactory` access (entity persistence). Day-to-day queries use pure JDBC via `Database.java`.
+- Data access is JDBC-only via `Database.java` and the `Jdbc*Repository` implementations.
 
 ---
 
@@ -161,26 +160,24 @@ The app follows a layered architecture with strict separation of concerns:
 src/
   main/
     java/com/splitms/
-      controllers/          # JavaFX FXML controllers (one per view)
-      entities/             # JPA entities (7 classes, one per table)
-      interfaces/           # Service + domain interfaces (8 total)
-      lib/                  # Database.java (JDBC), Jpa.java (Hibernate EMF)
-      models/               # Immutable Java records used as DTOs (7 total)
-      pages/                # App entry point (SplitmsApplication) + ViewNavigator
-      repositories/         # Repository interfaces (7) + JDBC implementations (7)
-      services/             # Business logic services (6) + helpers + security/
-        security/           # PasswordHasher interface + Pbkdf2PasswordHasher
-      utils/                # EnvConfig, Normalize, Validation, SystemInfo
+      SplitmsApplication.java     # App entry point, stage + scene setup
+      ViewNavigator.java          # Scene management and navigation logic
+      controllers/                # JavaFX FXML controllers (one per view)
+      interfaces/                 # Service + domain interfaces (8 total)
+      lib/                        # Database.java (JDBC connection pool)
+      models/                     # Immutable Java records used as DTOs (7 total)
+      repositories/               # Repository interfaces (7) + JDBC implementations (7)
+      services/                   # Business logic services (6) + helpers + security/
+        security/                 # PasswordHasher interface + Pbkdf2PasswordHasher
+      utils/                      # EnvConfig, Normalize, Validation, SystemInfo
     resources/
       com/splitms/
-        views/              # FXML layout files (9 files)
-        styles/             # app.css
-      db/migration/         # Flyway SQL (V1-V9)
-      META-INF/
-        persistence.xml     # JPA/Hibernate configuration
+        views/                    # FXML layout files (9 files)
+        styles/                   # app.css
+      db/migration/               # Flyway SQL (V1-V9)
   test/
     java/com/splitms/
-      services/             # Integration test suites (6, require live DB)
+      services/                   # Integration test suites (6, require live DB)
 ```
 
 ---
@@ -389,9 +386,6 @@ Loads configuration from a `.env` file in the working directory (parsed on class
 
 ### `Database`
 Singleton JDBC connection helper. `initialize()` creates the connection from `EnvConfig` values (`jdbc:mysql://HOST:PORT/DB_NAME`). Exposes `executeQuery(sql)` (returns a `CachedRowSet`) and `executeUpdate(sql)` for DML. `shutdown()` closes the connection cleanly on app exit.
-
-### `Jpa`
-Singleton `EntityManagerFactory` wrapper. Reads `META-INF/persistence.xml` but overrides JDBC URL and credentials at runtime from `EnvConfig`. Call `openEntityManager()` to get a fresh `EntityManager`. Hibernate logging is suppressed to `SEVERE` at startup.
 
 ### `Normalize`
 - `normalizeText(String)` — trims and null-checks a string.

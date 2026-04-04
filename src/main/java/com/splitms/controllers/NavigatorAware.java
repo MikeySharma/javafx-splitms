@@ -1,6 +1,6 @@
 package com.splitms.controllers;
 
-import com.splitms.pages.ViewNavigator;
+import com.splitms.ViewNavigator;
 
 public interface NavigatorAware {
     void setNavigator(ViewNavigator navigator);

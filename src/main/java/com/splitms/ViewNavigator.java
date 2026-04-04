@@ -1,4 +1,4 @@
-package com.splitms.pages;
+package com.splitms;
 
 import com.splitms.controllers.MainShellController;
 import com.splitms.controllers.NavigatorAware;
