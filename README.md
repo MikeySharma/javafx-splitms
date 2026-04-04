@@ -130,20 +130,20 @@ mvn test
 The app follows a layered architecture with strict separation of concerns:
 
 ```
-┌─────────────────────────────────────────────────┐
-│  Pages  (SplitmsApplication, ViewNavigator)      │  Entry point, scene/stage management
-├─────────────────────────────────────────────────┤
-│  Controllers  (JavaFX / FXML)                    │  UI event handlers, view state
-├─────────────────────────────────────────────────┤
-│  Services                                        │  Business logic, validation
-│    └── returns ServiceResult<T>                  │  Typed success/failure wrapper
-├─────────────────────────────────────────────────┤
-│  Repositories  (interfaces + JDBC impls)         │  SQL queries, entity mapping
-├─────────────────────────────────────────────────┤
-│  Database  (JDBC connection singleton)           │  Connection pool, executeQuery/Update
-├─────────────────────────────────────────────────┤
-│  MySQL                                           │  Persistent storage
-└─────────────────────────────────────────────────┘
+┌──────────────────────────────────────────────────┐
+│  Entry Point  (SplitmsApplication, ViewNavigator) │  Stage/scene management, navigation
+├──────────────────────────────────────────────────┤
+│  Controllers  (JavaFX / FXML)                     │  UI event handlers, view state
+├──────────────────────────────────────────────────┤
+│  Services                                         │  Business logic, validation
+│    └── returns ServiceResult<T>                   │  Typed success/failure wrapper
+├──────────────────────────────────────────────────┤
+│  Repositories  (interfaces + JDBC impls)          │  SQL queries, entity mapping
+├──────────────────────────────────────────────────┤
+│  Database  (JDBC connection pool)                 │  Connection management, executeQuery/Update
+├──────────────────────────────────────────────────┤
+│  MySQL                                            │  Persistent storage (Flyway-managed)
+└──────────────────────────────────────────────────┘
 ```
 
 **Cross-cutting concerns:**
@@ -160,23 +160,24 @@ The app follows a layered architecture with strict separation of concerns:
 src/
   main/
     java/com/splitms/
-      controllers/          # JavaFX FXML controllers (one per view)
-      interfaces/           # Service + domain interfaces (8 total)
-      lib/                  # Database.java (JDBC)
-      models/               # Immutable Java records used as DTOs (7 total)
-      pages/                # App entry point (SplitmsApplication) + ViewNavigator
-      repositories/         # Repository interfaces (7) + JDBC implementations (7)
-      services/             # Business logic services (6) + helpers + security/
-        security/           # PasswordHasher interface + Pbkdf2PasswordHasher
-      utils/                # EnvConfig, Normalize, Validation, SystemInfo
+      SplitmsApplication.java     # App entry point, stage + scene setup
+      ViewNavigator.java          # Scene management and navigation logic
+      controllers/                # JavaFX FXML controllers (one per view)
+      interfaces/                 # Service + domain interfaces (8 total)
+      lib/                        # Database.java (JDBC connection pool)
+      models/                     # Immutable Java records used as DTOs (7 total)
+      repositories/               # Repository interfaces (7) + JDBC implementations (7)
+      services/                   # Business logic services (6) + helpers + security/
+        security/                 # PasswordHasher interface + Pbkdf2PasswordHasher
+      utils/                      # EnvConfig, Normalize, Validation, SystemInfo
     resources/
       com/splitms/
-        views/              # FXML layout files (9 files)
-        styles/             # app.css
-      db/migration/         # Flyway SQL (V1-V9)
+        views/                    # FXML layout files (9 files)
+        styles/                   # app.css
+      db/migration/               # Flyway SQL (V1-V9)
   test/
     java/com/splitms/
-      services/             # Integration test suites (6, require live DB)
+      services/                   # Integration test suites (6, require live DB)
 ```
 
 ---
