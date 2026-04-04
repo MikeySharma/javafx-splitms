@@ -54,37 +54,37 @@ public class MainShellController implements NavigatorAware {
     }
 
     public void showDashboardContent() {
-        setCenterContent(DASHBOARD_CONTENT);
-        setActiveNav(dashboardButton);
+        showContent(DASHBOARD_CONTENT, dashboardButton, null);
     }
 
     public void showGroupsContent() {
-        setCenterContent(GROUPS_CONTENT, controller -> {
+        showContent(GROUPS_CONTENT, groupsButton, controller -> {
             if (controller instanceof GroupsContentController groupsContentController) {
                 groupsContentController.setOnGroupOpenRequest(this::showGroupDetailsContent);
             }
         });
-        setActiveNav(groupsButton);
     }
 
     public void showGroupDetailsContent(GroupModel group) {
-        setCenterContent(GROUP_DETAILS_CONTENT, controller -> {
+        showContent(GROUP_DETAILS_CONTENT, groupsButton, controller -> {
             if (controller instanceof GroupDetailsContentController detailsController) {
                 detailsController.setOnBackRequest(this::showGroupsContent);
                 detailsController.loadGroup(group);
             }
         });
-        setActiveNav(groupsButton);
     }
 
     public void showProfileContent() {
-        setCenterContent(PROFILE_CONTENT);
-        setActiveNav(profileButton);
+        showContent(PROFILE_CONTENT, profileButton, null);
     }
 
     public void showExpensesContent() {
-        setCenterContent(EXPENSES_CONTENT);
-        setActiveNav(expensesButton);
+        showContent(EXPENSES_CONTENT, expensesButton, null);
+    }
+
+    private void showContent(String resourcePath, Button navButton, Consumer<Object> controllerInitializer) {
+        setCenterContent(resourcePath, controllerInitializer);
+        setActiveNav(navButton);
     }
 
     private void loadUserOnShellOpen() {
@@ -113,15 +113,9 @@ public class MainShellController implements NavigatorAware {
         try {
             FXMLLoader loader = new FXMLLoader(getClass().getResource(resourcePath));
             Node content = loader.load();
-
             Object controller = loader.getController();
-            if (controller instanceof DashboardContentController dashboardContentController) {
-                dashboardContentController.setWelcomeName(sessionManager.getUserName());
-            }
-            if (controller instanceof ProfileContentController profileContentController) {
-                profileContentController.setOnProfileUpdated(this::loadUserOnShellOpen);
-                profileContentController.loadProfile();
-            }
+            
+            initializeController(controller);
             if (controllerInitializer != null) {
                 controllerInitializer.accept(controller);
             }
@@ -132,12 +126,19 @@ public class MainShellController implements NavigatorAware {
         }
     }
 
-    private void setActiveNav(Button activeButton) {
-        dashboardButton.getStyleClass().setAll("dashboard-nav-link");
-        groupsButton.getStyleClass().setAll("dashboard-nav-link");
-        profileButton.getStyleClass().setAll("dashboard-nav-link");
-        expensesButton.getStyleClass().setAll("dashboard-nav-link");
+    private void initializeController(Object controller) {
+        if (controller instanceof DashboardContentController dashboardController) {
+            dashboardController.setWelcomeName(sessionManager.getUserName());
+        } else if (controller instanceof ProfileContentController profileController) {
+            profileController.setOnProfileUpdated(this::loadUserOnShellOpen);
+            profileController.loadProfile();
+        }
+    }
 
+    private void setActiveNav(Button activeButton) {
+        for (Button button : new Button[]{dashboardButton, groupsButton, profileButton, expensesButton}) {
+            button.getStyleClass().setAll("dashboard-nav-link");
+        }
         if (activeButton != null) {
             activeButton.getStyleClass().setAll("dashboard-nav-active");
         }
@@ -145,29 +146,27 @@ public class MainShellController implements NavigatorAware {
 
     @FXML
     private void onDashboard() {
-        if (navigator != null) {
-            navigator.showDashboard();
-        }
+        navigateTo(navigator::showDashboard);
     }
 
     @FXML
     private void onGroups() {
-        if (navigator != null) {
-            navigator.showGroups();
-        }
+        navigateTo(navigator::showGroups);
     }
 
     @FXML
     private void onProfile() {
-        if (navigator != null) {
-            navigator.showProfile();
-        }
+        navigateTo(navigator::showProfile);
     }
 
     @FXML
     private void onExpenses() {
+        navigateTo(navigator::showExpenses);
+    }
+
+    private void navigateTo(Runnable navigationAction) {
         if (navigator != null) {
-            navigator.showExpenses();
+            navigationAction.run();
         }
     }
 

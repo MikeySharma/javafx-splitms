@@ -405,105 +405,77 @@ public class GroupDetailsContentController {
             return;
         }
 
+        ExpenseInput expenseInput = input.get();
+        BigDecimal amount = expenseInput.amount();
+        String title = expenseInput.title();
+
         // Validate amount
-        if (input.get().amount() == null || input.get().amount().compareTo(BigDecimal.ZERO) <= 0) {
+        if (amount == null || amount.compareTo(BigDecimal.ZERO) <= 0) {
             showError("Amount must be greater than 0.");
             return;
         }
 
         // Validate title
-        if (input.get().title() == null || input.get().title().isBlank()) {
+        if (title == null || title.isBlank()) {
             showError("Title is required.");
             return;
         }
 
-        // Get payer user ID from selected member name
-        GroupMemberView selectedPayer = null;
-        for (GroupMemberView member : currentMembers) {
-            if ((member.name() + " (" + member.email() + ")").equals(input.get().payer())) {
-                selectedPayer = member;
-                break;
-            }
-        }
-        
+        GroupMemberView selectedPayer = findMemberByDisplayName(expenseInput.payer());
         if (selectedPayer == null) {
             showError("Invalid payer selected.");
             return;
         }
 
-        // Get category ID from selected category
-        CategoryModel selectedCategory = null;
-        for (CategoryModel cat : categoriesList) {
-            if (cat.categoryName().equals(input.get().category())) {
-                selectedCategory = cat;
-                break;
-            }
-        }
-        
+        CategoryModel selectedCategory = findCategoryByName(expenseInput.category());
         if (selectedCategory == null) {
             showError("Invalid category selected.");
             return;
         }
 
         // Build expense splits based on split type
-        Set<GroupMemberView> selectedMembers = input.get().selectedMembers();
-        
+        Set<GroupMemberView> selectedMembers = new HashSet<>(expenseInput.selectedMembers());
+
         // Validate that at least one member is selected
-        if (selectedMembers == null || selectedMembers.isEmpty()) {
+        if (selectedMembers.isEmpty()) {
             showError("At least one member must be selected for the expense split.");
             return;
         }
-        
+
         // Ensure payer is always included in the split
         selectedMembers.add(selectedPayer);
-        
+
         // For CUSTOM split, show custom percentage dialog
-        Map<GroupMemberView, Float> customPercentages = input.get().customPercentages();
-        if ("CUSTOM".equals(input.get().splitType())) {
+        Map<GroupMemberView, Float> percentagesByMember = new HashMap<>();
+        if ("CUSTOM".equals(expenseInput.splitType())) {
             Optional<Map<GroupMemberView, Float>> customPercentagesOpt = showCustomPercentageSplitDialog(selectedMembers);
             if (customPercentagesOpt.isEmpty()) {
                 // User cancelled the custom percentage dialog
                 return;
             }
-            customPercentages = customPercentagesOpt.get();
-        }
-        
-        List<ExpenseSplitModel> splits = new ArrayList<>();
-        
-        if ("EQUAL".equals(input.get().splitType())) {
-            // Equal split among selected members
-            BigDecimal shareAmount = input.get().amount().divide(
-                BigDecimal.valueOf(selectedMembers.size()),
-                2,
-                java.math.RoundingMode.HALF_UP
-            );
-            float sharePercentage = 100f / selectedMembers.size();
-            
-            for (GroupMemberView member : selectedMembers) {
-                splits.add(new ExpenseSplitModel(
-                    0, // splitId (not set yet)
-                    0, // expenseId (not set yet)
-                    member.userId(),
-                    shareAmount,
-                    sharePercentage
-                ));
-            }
+            percentagesByMember.putAll(customPercentagesOpt.get());
         } else {
-            // Custom split - use percentages provided by user
+            float equalPercentage = 100f / selectedMembers.size();
             for (GroupMemberView member : selectedMembers) {
-                Float percentage = customPercentages.getOrDefault(member, 0f);
-                BigDecimal shareAmount = input.get().amount()
-                    .multiply(BigDecimal.valueOf(percentage / 100.0))
-                    .setScale(2, java.math.RoundingMode.HALF_UP);
-                
-                splits.add(new ExpenseSplitModel(
-                    0, // splitId (not set yet)
-                    0, // expenseId (not set yet)
-                    member.userId(),
-                    shareAmount,
-                    percentage
-                ));
+                percentagesByMember.put(member, equalPercentage);
             }
+        }
+
+        List<ExpenseSplitModel> splits = new ArrayList<>();
+
+        for (GroupMemberView member : selectedMembers) {
+            float percentage = percentagesByMember.getOrDefault(member, 0f);
+            BigDecimal shareAmount = amount
+                .multiply(BigDecimal.valueOf(percentage / 100.0))
+                .setScale(2, java.math.RoundingMode.HALF_UP);
+
+            splits.add(new ExpenseSplitModel(
+                0, // splitId (not set yet)
+                0, // expenseId (not set yet)
+                member.userId(),
+                shareAmount,
+                percentage
+            ));
         }
 
         // Create expense with splits through service
@@ -511,10 +483,10 @@ public class GroupDetailsContentController {
             group.groupId(),
             selectedPayer.userId(),
             selectedCategory.categoryId(),
-            input.get().amount(),
-            input.get().date(),
-            input.get().title(),
-            input.get().description(),
+            amount,
+            expenseInput.date(),
+            title,
+            expenseInput.description(),
             splits
         );
         
@@ -525,6 +497,25 @@ public class GroupDetailsContentController {
 
         showSuccess("Expense added successfully!");
         refreshGroupData();
+    }
+
+    private GroupMemberView findMemberByDisplayName(String displayName) {
+        for (GroupMemberView member : currentMembers) {
+            String memberDisplayName = member.name() + " (" + member.email() + ")";
+            if (memberDisplayName.equals(displayName)) {
+                return member;
+            }
+        }
+        return null;
+    }
+
+    private CategoryModel findCategoryByName(String categoryName) {
+        for (CategoryModel cat : categoriesList) {
+            if (cat.categoryName().equals(categoryName)) {
+                return cat;
+            }
+        }
+        return null;
     }
 
     /**
