@@ -66,7 +66,8 @@ public class ExpensesService implements ExpenseService {
         String safeTitle = normalizedTitle.isBlank() ? "Expense" : normalizedTitle;
         String safeDescription = normalizedDescription.isBlank() ? "No description" : normalizedDescription;
 
-        int expenseId = expenseRepository.create(groupId, payerId, categoryId, amount, expenseDate, safeTitle, safeDescription);
+        int expenseId = expenseRepository.create(groupId, payerId, categoryId, amount, expenseDate, safeTitle,
+                safeDescription);
         if (expenseId <= 0) {
             return ServiceResult.fail("Could not create expense.");
         }
@@ -77,8 +78,8 @@ public class ExpensesService implements ExpenseService {
     }
 
     @Override
-    public ServiceResult<ExpenseModel> createExpenseWithSplits(int groupId, int payerId,
-            int categoryId, BigDecimal amount, LocalDate expenseDate, String title, String description,
+    public ServiceResult<ExpenseModel> createExpenseWithSplits(int groupId, int payerId, int categoryId,
+            BigDecimal amount, LocalDate expenseDate, String title, String description,
             List<ExpenseSplitModel> splits) {
 
         if (splits == null || splits.isEmpty()) {
@@ -133,7 +134,8 @@ public class ExpensesService implements ExpenseService {
         String safeTitle = normalizedTitle.isBlank() ? "Expense" : normalizedTitle;
         String safeDescription = normalizedDescription.isBlank() ? "No description" : normalizedDescription;
 
-        boolean updated = expenseRepository.update(expenseId, categoryId, amount, expenseDate, safeTitle, safeDescription);
+        boolean updated = expenseRepository.update(expenseId, categoryId, amount, expenseDate, safeTitle,
+                safeDescription);
         if (!updated) {
             return ServiceResult.fail("Expense update failed.");
         }
